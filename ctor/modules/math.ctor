@@ -1,0 +1,16 @@
+version = 1
+name = "math"
+enable_by_default = True
+options = {}
+
+def depends():
+  pass
+
+def configure(cfg):
+  add_files(
+    'math/vector.c',
+    'math/math.c',
+    'math/minmax.c',
+    'math/randomgenerator.c',
+    'math/triangulate.c'
+  )

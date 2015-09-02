@@ -1,0 +1,20 @@
+version = 1
+name = "graphics"
+enable_by_default = True
+options = {}
+
+def depends():
+  pass
+
+def configure(cfg):
+  add_files(
+    'graphics/batch.c',
+    'graphics/canvas.c',
+    'graphics/geometry.c',
+    'graphics/graphics.c',
+    'graphics/image.c',
+    'graphics/matrixstack.c',
+    'graphics/quad.c',
+    'graphics/shader.c',
+    'graphics/gltools.c',
+  )

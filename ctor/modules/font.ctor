@@ -1,0 +1,34 @@
+version = 1
+name = "font"
+enable_by_default = True
+options = {}
+
+def depends():
+  return all("freetype", "utf8")
+
+def configure(cfg):
+  def make_font_file():
+    import sys
+    sourcefile = os.path.join(os.path.dirname(sys.argv[0]), "data", "vera.ttf")
+    compiled = os.path.exists("vera_ttf.c") and os.path.getmtime("vera_ttf.c") or 0
+    source   = os.path.getmtime(sourcefile)
+
+    if compiled > source:
+      return False
+    
+    with open(sourcefile, "rb") as datafile, open("vera_ttf.c", "w") as outputfile:
+      content = bytearray(datafile.read())
+      outputfile.write("static unsigned char const defaultFontData[] = {\n")
+
+      for i in range(len(content)):
+        outputfile.write("0x{:02x}, ".format(content[i]))
+        if i % 16 == 15:
+          outputfile.write("\n")
+
+      outputfile.write("}};\nstatic size_t defaultFontSize = {};".format(len(content)))
+    
+    return True
+
+  add_prebuild_step(make_font_file)
+  add_files('graphics/font.c')
+

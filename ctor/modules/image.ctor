@@ -1,0 +1,12 @@
+version = 1
+name = "image"
+enable_by_default = True
+options = {}
+
+def depends():
+  pass
+
+def configure(cfg):
+  add_files(
+    'image/imagedata.c'
+  )

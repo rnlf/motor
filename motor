@@ -7,8 +7,10 @@ import shutil
 import subprocess
 import glob
 import zipfile
+import ctor
+import json
 
-motor_dir = os.path.dirname(sys.argv[0])
+motor_dir = os.path.dirname(__file__
 
 search_path = [motor_dir + "/build"]
 
@@ -57,6 +59,10 @@ def findFile(name):
     if of.path.exists(i + "/" + name):
       return i + "/" + name
 
+def load_config():
+  with open("motor.cfg") as f:
+    return json.load(f)
+
 if sys.argv[1] == "serve":
   class RequestHandler(http.server.SimpleHTTPRequestHandler):
     def translate_path(self, path):
@@ -85,6 +91,35 @@ if sys.argv[1] == "serve":
   server = http.server.HTTPServer(('', 8000), RequestHandler)
 
   server.serve_forever()
+
+elif sys.argv[1] == "init":
+  if os.path.exists("motor.cfg"):
+    print("motor.cfg does already exist. Bailing out.")
+    exit()
+
+  modules = ctor.load_modules([ctor.module_path()])
+  config = {
+    "modules": {},
+    "repository_dirs": [
+      os.path.relpath()
+    ],
+    "build_dir": os.path.join(".", "_build"),
+    "game_dir": os.path.join(".", "_game")
+  }
+
+  config["modules"] = {}
+  for k, v in modules.items():
+    config["modules"][k] = {}
+
+  with open("motor.cfg", "w") as f:
+    json.dump(config, f, indent=2)
+
+elif sys.argv[1] == "build":
+  try:
+    ctor.build(load_config())
+  except FileNotFoundError:
+    print("Config file not found, please use `motor init` first")
+  
 
 elif sys.argv[1] == "pack":
   pass

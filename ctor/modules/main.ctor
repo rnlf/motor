@@ -1,0 +1,15 @@
+version = 1
+name = "main"
+enable_by_default = True
+options = {}
+
+def depends():
+  pass
+
+def configure(cfg):
+  add_files(
+    'main.c',
+    'motor.c'
+  )
+
+

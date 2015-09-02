@@ -1,0 +1,12 @@
+version = 1
+name = "mouse"
+enable_by_default = True
+options = {}
+
+def depends():
+  pass
+
+def configure(cfg):
+  add_files(
+    'mouse.c',
+  )

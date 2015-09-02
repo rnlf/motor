@@ -1,0 +1,15 @@
+version = 1
+name = "lua_main"
+enable_by_default = True
+options = {}
+
+def depends():
+  pass
+
+def configure(cfg):
+  add_files(
+    'luaapi/boot.c',
+    'luaapi/motor.c',
+    'luaapi/tools.c',
+    'errorhandler.c',
+  )

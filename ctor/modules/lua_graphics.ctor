@@ -1,0 +1,20 @@
+version = 1
+name = "lua_graphics"
+enable_by_default = True
+options = {}
+
+def depends():
+  add_dependency(module("lua_polygon"))
+
+def configure(cfg):
+  add_files(
+    'luaapi/graphics.c',
+    'luaapi/graphics_batch.c',
+    'luaapi/graphics_canvas.c',
+    'luaapi/graphics_font.c',
+    'luaapi/graphics_geometry.c',
+    'luaapi/graphics_image.c',
+    'luaapi/graphics_quad.c',
+    'luaapi/graphics_shader.c',
+    'luaapi/graphics_window.c',
+  )

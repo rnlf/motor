@@ -1,0 +1,12 @@
+version = 1
+name = "timer"
+enable_by_default = True
+options = {}
+
+def depends():
+  pass
+
+def configure(cfg):
+  add_files(
+    'timer/timer.c',
+  )

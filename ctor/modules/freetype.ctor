@@ -1,0 +1,48 @@
+version = 1
+name = "freetype"
+enable_by_default = True
+options = {}
+
+def depends():
+  pass
+
+def configure(cfg):
+  add_files(
+    '3rdparty/freetype/src/base/ftbitmap.c',
+    '3rdparty/freetype/src/base/ftcalc.c',
+    '3rdparty/freetype/src/base/ftgloadr.c',
+    '3rdparty/freetype/src/base/ftglyph.c',
+    '3rdparty/freetype/src/base/ftinit.c',
+    '3rdparty/freetype/src/base/ftobjs.c',
+    '3rdparty/freetype/src/base/ftoutln.c',
+    '3rdparty/freetype/src/base/ftrfork.c',
+    '3rdparty/freetype/src/base/ftstream.c',
+    '3rdparty/freetype/src/base/ftsystem.c',
+    '3rdparty/freetype/src/base/fttrigon.c',
+    '3rdparty/freetype/src/base/ftutil.c',
+    '3rdparty/freetype/src/gzip/ftgzip.c',
+    '3rdparty/freetype/src/sfnt/sfnt.c',
+    '3rdparty/freetype/src/smooth/smooth.c',
+    '3rdparty/freetype/src/truetype/truetype.c'
+  )
+
+  relsrcdir = os.path.relpath(source_directory())
+
+  args = list(
+    map(
+      lambda x: os.path.join(relsrcdir, "/3rdparty/freetype/src/", x),
+      ["truetype", "sfnt", "autofit", "smooth", "raster", "psaux", "psnames"]
+    )
+  )
+
+  add_include_dirs(*args)
+  add_include_dirs(
+    os.path.join(relsrcdir, "/3rdparty/freetype/include")
+  )
+  
+  def config_ft():
+    os.system('sed -e "s/FT_CONFIG_OPTIONS_H/<ftoption.h>/" -e "s/FT_CONFIG_STANDARD_LIBRARY_H/<ftstdlib.h>/" -e "s?/undef ?#undef ?" <{srcdir}/3rdparty/freetype/builds/unix/ftconfig.in >ftconfig.h'.format(srcdir=os.path.relpath(source_directory())))
+    os.system('mkdir -p config; sed -e \'/tt_driver\\|sfnt_module\\|ft_smooth_renderer/ !d\' < {srcdir}/3rdparty/freetype/include/config/ftmodule.h >config/ftmodule.h'.format(srcdir=os.path.relpath(source_directory())))
+
+  add_compiler_flags("-DFT2_BUILD_LIBRARY")
+  add_prebuild_step(config_ft)

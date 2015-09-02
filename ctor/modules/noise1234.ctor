@@ -1,0 +1,12 @@
+version = 1
+name = "noise1234"
+enable_by_default = True
+options = {}
+
+def depends():
+  pass
+
+def configure(cfg):
+  add_files(
+    '3rdparty/noise1234/simplexnoise1234.c',
+  )

@@ -1,0 +1,12 @@
+version = 1
+name = "utf8"
+enable_by_default = True
+options = {}
+
+def depends():
+  pass
+
+def configure(cfg):
+  add_files(
+    'tools/utf8.c',
+  )

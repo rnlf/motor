@@ -1,0 +1,12 @@
+version = 1
+name = "lua_mouse"
+enable_by_default = True
+options = {}
+
+def depends():
+  pass
+
+def configure(cfg):
+  add_files(
+    'luaapi/mouse.c',
+  )
