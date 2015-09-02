@@ -10,7 +10,7 @@ import zipfile
 import ctor
 import json
 
-motor_dir = os.path.dirname(__file__
+motor_dir = os.path.dirname(__file__)
 
 search_path = [motor_dir + "/build"]
 
@@ -97,11 +97,13 @@ elif sys.argv[1] == "init":
     print("motor.cfg does already exist. Bailing out.")
     exit()
 
-  modules = ctor.load_modules([ctor.module_path()])
+  repo_dir = os.path.relpath(os.path.join(motor_dir, "ctor"))
+
+  modules = ctor.load_modules([repo_dir])
   config = {
     "modules": {},
     "repository_dirs": [
-      os.path.relpath()
+      repo_dir
     ],
     "build_dir": os.path.join(".", "_build"),
     "game_dir": os.path.join(".", "_game")

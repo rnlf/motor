@@ -40,7 +40,7 @@ def add_prebuild_step(func, outputs=[], dependencies=[]):
   prebuild.append(func)
 
 
-def load_modules(module_directories):
+def load_modules(repo_directories):
   modules = {}
     
   def load_module_file(filename):
@@ -67,8 +67,15 @@ def load_modules(module_directories):
       modules[module["name"]] = module
           
 
-  for d in module_directories:
-    for fname in glob.iglob(os.path.join(d, "*.ctor")):
+  for d in repo_directories:
+    repo = {}
+    cfg_filename = os.path.join(d, "ctor.cfg")
+    with open(cfg_filename) as cfg:
+      exec(compile(cfg.read(), cfg_filename, 'exec'), {}, repo)
+
+    print(repo["repository"], repo["source_dir"])
+
+    for fname in glob.iglob(os.path.join(d, "modules", "*.ctor")):
       load_module_file(fname)
 
   return modules
