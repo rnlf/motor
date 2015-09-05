@@ -145,7 +145,7 @@ int main() {
   lua_pushstring(lua, "load");
   lua_rawget(lua, -2);
   if(lua_pcall(lua, 0, 0, 1)) {
-    printf("Errorin love.load: %s\n", lua_tostring(lua, -1));
+    printf("Error in love.load: %s\n", lua_tostring(lua, -1));
   }
   lua_pop(lua, 1);
 
