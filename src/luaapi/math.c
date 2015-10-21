@@ -4,6 +4,7 @@
 #include "../math/randomgenerator.h"
 #include "../math/triangulate.h"
 #include "../math/minmax.h"
+#include "../math/gamma.h"
 #include "../3rdparty/noise1234/simplexnoise1234.h"
 #include <math.h>
 #include <inttypes.h>
@@ -245,6 +246,29 @@ static int l_math_noise(lua_State* state) {
 }
 
 
+static int l_math_linearGammaConvert(lua_State* state, float (*convert)(float)) {
+  float *components;
+  int numbers = l_tools_readNumbers(state, 0, &components, 1, 1);
+  int i;
+  for(i = 0; i < numbers && i < 4; ++i) {
+    lua_pushnumber(state, convert(components[i]));
+  }
+
+  return i;
+}
+
+
+static int l_math_linearToGamma(lua_State* state) {
+  return l_math_linearGammaConvert(state, math_linearToGamma);
+}
+
+
+static int l_math_gammaToLinear(lua_State* state) {
+  return l_math_linearGammaConvert(state, math_gammaToLinear);
+}
+
+
+
 static luaL_Reg const mathFreeFuncs[] = {
   {"random",             l_math_random_free},
   {"randomNormal",       l_math_randomNormal_free},
@@ -254,6 +278,8 @@ static luaL_Reg const mathFreeFuncs[] = {
   {"triangulate",        l_math_triangulate},
   {"noise",              l_math_noise},
   {"isConvex",           l_math_isConvex},
+  {"linearToGamma",      l_math_linearToGamma},
+  {"gammaToLinear",      l_math_gammaToLinear},
   {NULL, NULL}
 };
 
