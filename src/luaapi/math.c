@@ -1,4 +1,5 @@
 #include "polygon.h"
+#include "bezier.h"
 #include "tools.h"
 #include "math.h"
 #include "../math/randomgenerator.h"
@@ -299,5 +300,7 @@ void l_math_register(lua_State* state) {
 
   moduleData.randomGeneratorMT = l_tools_makeTypeMetatable(state, randomGeneratorMetatableFuncs);
   l_tools_registerModule(state, "math", mathFreeFuncs);
+
+  l_math_bezier_register(state);
 
 }
