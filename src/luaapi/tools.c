@@ -1,6 +1,15 @@
+#include <stdlib.h>
 #include <lauxlib.h>
 #include <string.h>
 #include "tools.h"
+
+
+static struct {
+  float * numbers;
+  int numberSize;
+} moduleData;
+
+
 
 void l_tools_registerFuncsInModule(lua_State* state, char const* module, luaL_Reg const* funcs) {
   lua_getglobal(state, "love");
@@ -53,6 +62,53 @@ void l_tools_pushEnum(lua_State* state, int value, l_tools_Enum const* values) {
 
   // C code has to make sure the enum value is valid!
 }
+
+
+int l_tools_readNumbers(lua_State* state, int offset, float **numbers, int minNums, int components) {
+  bool table = lua_istable(state, 1 + offset);
+
+  int count;
+  if(table) {
+    count = lua_objlen(state, 1 + offset);
+  } else {
+    count = lua_gettop(state) - offset;
+  }
+
+  if(count % components) {
+    lua_pushstring(state, "Need even number of values");
+    return lua_error(state);
+  }
+
+  if(count < minNums) {
+    lua_pushstring(state, "Need at least ");
+    lua_pushnumber(state, minNums);
+    lua_pushstring(state, " numbers");
+    lua_concat(state, 3);
+    return lua_error(state);
+  }
+
+  if(count > moduleData.numberSize) {
+    moduleData.numbers = realloc(moduleData.numbers, count * sizeof(float));
+    moduleData.numberSize = count;
+  }
+
+  if(table) {
+    for(int i = 0; i < count; ++i) {
+      lua_rawgeti(state, 1+offset, i+1);
+      moduleData.numbers[i] = l_tools_toNumberOrError(state, -1);
+      lua_pop(state, 1);
+    }
+  } else {
+    for(int i = 0; i < count; ++i) {
+      moduleData.numbers[i] = l_tools_toNumberOrError(state, 1 + i + offset);
+    }
+  }
+
+  *numbers = moduleData.numbers;
+
+  return count / components;
+}
+
 
 extern inline int l_tools_toBooleanOrError(lua_State* state, int index);
 extern inline float l_tools_toNumberOrError(lua_State* state, int index);

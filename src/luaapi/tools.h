@@ -99,3 +99,5 @@ void l_tools_pushEnum(lua_State* state, int value, l_tools_Enum const* values);
 #else
 # define l_assertType(state, index, func)
 #endif
+
+int l_tools_readNumbers(lua_State* state, int offset, float **numbers, int minNums, int components);
