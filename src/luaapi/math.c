@@ -199,6 +199,15 @@ static int l_math_triangulate(lua_State* state) {
 }
 
 
+static int l_math_isConvex(lua_State* state) {
+  float *vertices;
+  int count = l_geometry_read_vertices(state, 0, &vertices, 6);
+
+  lua_pushboolean(state, math_isConvex(vertices, count));
+  return 1;
+}
+
+
 static int l_math_noise(lua_State* state) {
   float a[4];
   float r;
@@ -244,6 +253,7 @@ static luaL_Reg const mathFreeFuncs[] = {
   {"getRandomSeed",      l_math_getRandomSeed},
   {"triangulate",        l_math_triangulate},
   {"noise",              l_math_noise},
+  {"isConvex",           l_math_isConvex},
   {NULL, NULL}
 };
 
