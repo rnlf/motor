@@ -179,7 +179,7 @@ static int l_math_RandomGenerator_setState(lua_State* state) {
 
 static int l_math_triangulate(lua_State* state) {
   float *vertices;
-  int count = l_geometry_read_vertices(state, 0, &vertices);
+  int count = l_geometry_read_vertices(state, 0, &vertices, 6);
   int *indices;
   int triangles = math_triangulation_triangulate(vertices, count, &indices);
 

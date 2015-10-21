@@ -71,7 +71,7 @@ static int l_geometry_rectangle(lua_State* state) {
 
 static int l_geometry_line(lua_State* state) {
   float * vertices;
-  int count = l_geometry_read_vertices(state, 0, &vertices);
+  int count = l_geometry_read_vertices(state, 0, &vertices, 4);
   graphics_geometry_drawLines(count, vertices);
   return 0;
 }
@@ -79,7 +79,7 @@ static int l_geometry_line(lua_State* state) {
 
 static int l_geometry_polygon(lua_State* state) {
   float * vertices;
-  int count = l_geometry_read_vertices(state, 1, &vertices);
+  int count = l_geometry_read_vertices(state, 1, &vertices, 6);
   graphics_DrawMode mode = l_tools_toEnumOrError(state, 1, l_graphics_DrawMode);
   switch(mode) {
   case graphics_DrawMode_fill:

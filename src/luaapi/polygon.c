@@ -7,7 +7,7 @@ static struct {
 } moduleData;
 
 
-int l_geometry_read_vertices(lua_State* state, int offset, float **vertices) {
+int l_geometry_read_vertices(lua_State* state, int offset, float **vertices, int minVerts) {
   bool table = lua_istable(state, 1 + offset);
 
   int count;
@@ -22,8 +22,11 @@ int l_geometry_read_vertices(lua_State* state, int offset, float **vertices) {
     return lua_error(state);
   }
 
-  if(count < 4) {
-    lua_pushstring(state, "Need at least two points for drawing lines");
+  if(count < minVerts) {
+    lua_pushstring(state, "Need at least ");
+    lua_pushnumber(state, minVerts);
+    lua_pushstring(state, " numbers");
+    lua_concat(state, 3);
     return lua_error(state);
   }
 
