@@ -1,9 +1,7 @@
 #ifdef EMSCRIPTEN
 # include <emscripten.h>
-#else
-# define _POSIX_C_SOURCE 200809L
-# include <time.h>
 #endif
+#include <SDL2/SDL.h>
 #include "timer.h"
 
 static float const FpsUpdateTimeout = 1.0f;
@@ -21,9 +19,7 @@ float timer_getTime(void) {
 #ifdef EMSCRIPTEN
   return emscripten_get_now() / 1000.0f;
 #else
-  struct timespec ts;
-  clock_gettime(CLOCK_MONOTONIC, &ts);
-  return (double)(ts.tv_sec) + (double)(ts.tv_nsec) / 1000000000.0f;
+  return (float)SDL_GetTicks() / 1000.0f;
 #endif
 }
 
