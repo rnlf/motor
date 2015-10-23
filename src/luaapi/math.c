@@ -1,5 +1,5 @@
 #include "polygon.h"
-#include "bezier.h"
+#include "math_bezier.h"
 #include "tools.h"
 #include "math.h"
 #include "../math/randomgenerator.h"

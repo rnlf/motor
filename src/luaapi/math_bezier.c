@@ -1,5 +1,5 @@
 #include <lauxlib.h>
-#include "bezier.h"
+#include "math_bezier.h"
 #include "../math/bezier.h"
 #include "polygon.h"
 #include "tools.h"

@@ -28,7 +28,7 @@ sources = [
   'graphics/gltools.c',
   'image/imagedata.c',
   'luaapi/audio.c',
-  'luaapi/bezier.c',
+  'luaapi/math_bezier.c',
   'luaapi/boot.c',
   'luaapi/event.c',
   'luaapi/math.c',
