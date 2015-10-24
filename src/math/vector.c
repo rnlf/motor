@@ -161,9 +161,11 @@ void m4x4_newTranslation(mat4x4 *out, float x, float y, float z) {
 }
 
 void m4x4_newRotationX(mat4x4 *out, float a) {
+  // TODO
 }
 
 void m4x4_newRotationY(mat4x4 *out, float a) {
+  // TODO
 }
 
 void m4x4_newRotationZ(mat4x4 *out, float a) {
@@ -202,6 +204,7 @@ void m4x4_mulM4x4(mat4x4 *out, mat4x4 const* a, mat4x4 const* b) {
 }
 
 void m4x4_mulV4(vec4 *out, mat4x4 const* m, vec4 const* v) {
+  // TODO
 }
 
 void m3x3_mulV2(vec2 *out, mat3x3 const* m, vec2 const* v) {
