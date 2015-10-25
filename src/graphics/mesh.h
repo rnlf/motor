@@ -2,6 +2,7 @@
 
 #include "gl.h"
 #include "image.h"
+#include "vertex.h"
 
 typedef enum {
   graphics_MeshDrawMode_fan,
