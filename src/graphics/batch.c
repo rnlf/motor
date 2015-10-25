@@ -75,9 +75,9 @@ void graphics_Batch_new(graphics_Batch* batch, graphics_Image const* texture, in
 }
 
 void graphics_Batch_free(graphics_Batch* batch) {
-  glDeleteBuffers(1,      &mesh->vbo);
-  glDeleteVertexArrays(1, &mesh->vao);
-  free(mesh->vertexData);
+  glDeleteBuffers(1,      &batch->vbo);
+  glDeleteVertexArrays(1, &batch->vao);
+  free(batch->vertexData);
 }
 
 static const vec2 batchQuadPts[4] = {
