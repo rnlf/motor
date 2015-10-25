@@ -10,12 +10,20 @@ static struct {
 } moduleData;
 
 
-int l_graphics_newMesh(lua_State* state) {
+static readVertices(lua_State* state, graphics_Vertex** output) {
+  if(!lua_istable(state, 2)) {
+
+  }
+}
+
+
+static int l_graphics_newMesh(lua_State* state) {
   l_graphics_Mesh* mesh = lua_newuserdata(state, sizeof(l_graphics_Mesh));
 
-  // TODO mesh
+  
+  
 
-  lua_pushvalue(state, 1);
+  lua_pushvalue(state, 2);
   mesh->textureRef = luaL_ref(state, LUA_REGISTRYINDEX);
 
   lua_rawgeti(state, LUA_REGISTRYINDEX, moduleData.meshMT);
@@ -32,7 +40,7 @@ static int l_graphics_gcMesh(lua_State* state) {
 }
 
 
-int l_graphics_Mesh_getCount(lua_State* state) {
+static int l_graphics_Mesh_getCount(lua_State* state) {
   l_assertType(state, 1, l_graphics_isMesh);
 
   l_graphics_Mesh * mesh = l_graphics_toMesh(state, 1);
@@ -43,7 +51,7 @@ int l_graphics_Mesh_getCount(lua_State* state) {
 }
 
 
-int l_graphics_Mesh_setTexture(lua_State* state) {
+static int l_graphics_Mesh_setTexture(lua_State* state) {
   l_assertType(state, 1, l_graphics_isMesh);
   l_assertType(state, 2, l_graphics_isImage);
 
@@ -58,7 +66,7 @@ int l_graphics_Mesh_setTexture(lua_State* state) {
   return 0;
 }
 
-int l_graphics_Mesh_getTexture(lua_State* state) {
+static int l_graphics_Mesh_getTexture(lua_State* state) {
   l_assertType(state, 1, l_graphics_isMesh);
 
   l_graphics_Mesh * mesh = l_graphics_toMesh(state, 1);
