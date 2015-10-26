@@ -1,27 +1,87 @@
+#include <stdlib.h>
 #include <tgmath.h>
 #include <lauxlib.h>
 #include "graphics_mesh.h"
-#include "graphics_image.h"
+#include "graphics_texture.h"
 #include "tools.h"
+
+
+static const l_tools_Enum l_graphics_MeshDrawMode[] = {
+  {"fan",       graphics_MeshDrawMode_fan},
+  {"strip",     graphics_MeshDrawMode_strip},
+  {"triangles", graphics_MeshDrawMode_triangles},
+  {"points",    graphics_MeshDrawMode_points},
+  {NULL, 0}
+};
 
 
 static struct {
   int meshMT;
+  graphics_Vertex* vertexBuffer;
+  size_t vertexBufferSize;
 } moduleData;
 
 
-static readVertices(lua_State* state, graphics_Vertex** output) {
-  if(!lua_istable(state, 2)) {
-
+static void ensureVertexBufferSize(size_t count) {
+  if(moduleData.vertexBufferSize < count) {
+    free(moduleData.vertexBuffer);
+    moduleData.vertexBuffer = malloc(count * sizeof(graphics_Vertex));
   }
 }
 
 
-static int l_graphics_newMesh(lua_State* state) {
-  l_graphics_Mesh* mesh = lua_newuserdata(state, sizeof(l_graphics_Mesh));
+static void readVertex(lua_State* state, graphics_Vertex* out) {
+  if(!lua_istable(state, -1) || lua_objlen(state, -1) < 4) {
+    lua_pushstring(state, "Table entry is not a vertex");
+    lua_error(state); // does not return
+    return;           // hint the compiler
+  }
 
-  
-  
+  _Static_assert(sizeof(graphics_Vertex) == 8*sizeof(float), "");
+  float *t = (float*)out;
+
+  for(int i = 0; i < 4; ++i) {
+    printf("I=%d\n", i);
+    lua_rawgeti(state, -1, i+1);
+    t[i] = l_tools_toNumberOrError(state, -1);
+    lua_pop(state, 1);
+  }
+
+  for(int i = 4; i < 8; ++i) {
+    lua_rawgeti(state, -1, i+1);
+    t[i] = luaL_optnumber(state, -1, 255.0f) / 255.0f;
+    lua_pop(state, 1);
+  }
+}
+
+
+static size_t readVertices(lua_State* state) {
+  if(!lua_istable(state, 1)) {
+    lua_pushstring(state, "Need table of vertices");
+    lua_error(state); // does not return
+    return 0;         // hint the compiler
+  }
+
+  size_t count = lua_objlen(state, 1);
+  ensureVertexBufferSize(count);
+
+  for(size_t i = 0; i < count; ++i) {
+    lua_rawgeti(state, 1, i+1);
+    readVertex(state, moduleData.vertexBuffer + i);
+    lua_pop(state, 1);
+  }
+
+  return count;
+}
+
+
+static int l_graphics_newMesh(lua_State* state) {
+  size_t count = readVertices(state);
+  graphics_Image const* texture = l_graphics_toTextureOrError(state, 2);
+  graphics_MeshDrawMode mode = l_tools_toEnumOrError(state, 3, l_graphics_MeshDrawMode);
+
+  l_graphics_Mesh* mesh = lua_newuserdata(state, sizeof(l_graphics_Mesh));
+  graphics_Mesh_new(&mesh->mesh, count, moduleData.vertexBuffer, texture, mode);
 
   lua_pushvalue(state, 2);
   mesh->textureRef = luaL_ref(state, LUA_REGISTRYINDEX);
@@ -30,6 +90,7 @@ static int l_graphics_newMesh(lua_State* state) {
   lua_setmetatable(state, -2);
   return 1;
 }
+
 
 static int l_graphics_gcMesh(lua_State* state) {
   l_graphics_Mesh *mesh = l_graphics_toMesh(state, 1);
