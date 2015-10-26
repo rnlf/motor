@@ -175,12 +175,12 @@ int l_graphics_SpriteBatch_getCount(lua_State* state) {
 
 int l_graphics_SpriteBatch_setTexture(lua_State* state) {
   l_assertType(state, 1, l_graphics_isBatch);
-  l_assertType(state, 2, l_graphics_isImage);
 
   l_graphics_Batch * batch = l_graphics_toBatch(state, 1);
-  l_graphics_Image * image = l_graphics_toImage(state, 2);
 
-  batch->batch.texture = &image->image;
+  graphics_Image const *image = l_graphics_toTextureOrError(state, 2);
+
+  batch->batch.texture = image;
   luaL_unref(state, LUA_REGISTRYINDEX, batch->textureRef);
   lua_settop(state, 2);
   batch->textureRef = luaL_ref(state, LUA_REGISTRYINDEX);
