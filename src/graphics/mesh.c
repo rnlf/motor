@@ -11,6 +11,7 @@ void graphics_Mesh_new(graphics_Mesh *mesh, size_t vertexCount, graphics_Vertex 
   mesh->indices = 0;
 
   mesh->useVertexColor = useVertexColor;
+  mesh->useDrawRange = false;
 
   mesh->customIndexBuffer = false;
 
@@ -185,4 +186,26 @@ void graphics_Mesh_setVertexColors(graphics_Mesh *mesh, bool use) {
 
 bool graphics_Mesh_getVertexColors(graphics_Mesh const *mesh) {
   return mesh->useVertexColor;
+}
+
+
+void graphics_Mesh_resetDrawRange(graphics_Mesh *mesh) {
+  mesh->useDrawRange = false;
+}
+
+
+void graphics_Mesh_setDrawRange(graphics_Mesh *mesh, int min, int max) {
+  mesh->useDrawRange = true;
+  mesh->drawStart = min;
+  mesh->drawEnd = max;
+}
+
+
+bool graphics_Mesh_getDrawRange(graphics_Mesh const* mesh, int *min, int *max) {
+  if(mesh->useDrawRange) {
+    *min = mesh->drawStart;
+    *max = mesh->drawEnd;
+    return true;
+  }
+  return false;
 }

@@ -147,7 +147,7 @@ static int l_graphics_Mesh_setVertexColors(lua_State* state) {
 
   bool use = l_tools_toBooleanOrError(state, 2);
 
-  graphics_Mesh_setVertexColors(mesh, use);
+  graphics_Mesh_setVertexColors(&mesh->mesh, use);
 
   return 0;
 }
@@ -156,8 +156,42 @@ static int l_graphics_Mesh_setVertexColors(lua_State* state) {
 static int l_graphics_Mesh_getVertexColors(lua_State *state) {
   l_assertType(state, 1, l_graphics_isMesh);
   l_graphics_Mesh * mesh = l_graphics_toMesh(state, 1);
-  lua_pushboolean(state, graphics_Mesh_getVertexColors(mesh));
+  lua_pushboolean(state, graphics_Mesh_getVertexColors(&mesh->mesh));
   return 1;
+}
+
+
+static int l_graphics_Mesh_setDrawRange(lua_State *state) {
+  l_assertType(state, 1, l_graphics_isMesh);
+  l_graphics_Mesh * mesh = l_graphics_toMesh(state, 1);
+
+  int top = lua_gettop(state);
+  if(top == 3) {
+    int idx1 = l_tools_toNumberOrError(state, 2);
+    int idx2 = l_tools_toNumberOrError(state, 3);
+    graphics_Mesh_setDrawRange(&mesh->mesh, idx1, idx2);
+  } else if(top == 1) {
+    graphics_Mesh_resetDrawRange(&mesh->mesh);
+  } else {
+    lua_pushstring(state, "Need none or two numbers");
+    return lua_error(state);
+  }
+
+  return 0;
+}
+
+
+static int l_graphics_Mesh_getDrawRange(lua_State *state) {
+  l_assertType(state, 1, l_graphics_isMesh);
+  l_graphics_Mesh const* mesh = l_graphics_toMesh(state, 1);
+
+  int idx1, idx2;
+  if(graphics_Mesh_getDrawRange(&mesh->mesh, &idx1, &idx2)) {
+    lua_pushnumber(state, idx1);
+    lua_pushnumber(state, idx2);
+    return 2;
+  }
+  return 0;
 }
 
 
@@ -173,6 +207,8 @@ static luaL_Reg const meshMetatableFuncs[] = {
   {"getImage",           l_graphics_Mesh_getTexture},
   {"setVertexColors",    l_graphics_Mesh_setVertexColors},
   {"getVertexColors",    l_graphics_Mesh_getVertexColors},
+  {"setDrawRange",       l_graphics_Mesh_setDrawRange},
+  {"getDrawRange",       l_graphics_Mesh_getDrawRange},
   {NULL, NULL}
 };
 
