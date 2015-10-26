@@ -88,23 +88,21 @@ static int l_graphics_draw(lua_State* state) {
   int baseidx = 2;
 
   if(l_graphics_isImage(state, 1)) {
-    if(l_graphics_isQuad(state, 2)) {
-      quad = l_graphics_toQuad(state, 2);
-      baseidx = 3;
-    }
     image = l_graphics_toImage(state, 1);
   } else if(l_graphics_isCanvas(state, 1)) {
-    if(l_graphics_isQuad(state, 2)) {
-      quad = l_graphics_toQuad(state, 2);
-      baseidx = 3;
-    }
     canvas = l_graphics_toCanvas(state, 1);
-
   } else if(l_graphics_isBatch(state, 1)) {
     batch = l_graphics_toBatch(state, 1);
   } else {
     lua_pushstring(state, "expected image or spritebatch");
     lua_error(state);
+  }
+
+  if(image || canvas) {
+    if(l_graphics_isQuad(state, 2)) {
+      quad = l_graphics_toQuad(state, 2);
+      baseidx = 3;
+    }
   }
   
   float x  = luaL_optnumber(state, baseidx,     0.0f);
