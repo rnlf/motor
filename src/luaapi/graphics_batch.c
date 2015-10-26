@@ -1,8 +1,8 @@
 #include <tgmath.h>
 #include <lauxlib.h>
 #include "graphics_batch.h"
-#include "graphics_image.h"
 #include "graphics_quad.h"
+#include "graphics_texture.h"
 #include "tools.h"
 
 
@@ -18,9 +18,8 @@ static const graphics_Quad defaultQuad = {
 };
 
 int l_graphics_newSpriteBatch(lua_State* state) {
-  l_assertType(state, 1, l_graphics_isImage);
+  l_graphics_Image const* image = l_graphics_toTextureOrError(state, 1);
 
-  l_graphics_Image const* image = l_graphics_toImage(state, 1);
   int count = luaL_optnumber(state, 2, 128);
 
   l_graphics_Batch* batch = lua_newuserdata(state, sizeof(l_graphics_Batch));
