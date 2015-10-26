@@ -141,6 +141,26 @@ static int l_graphics_Mesh_getTexture(lua_State* state) {
 }
 
 
+static int l_graphics_Mesh_setVertexColors(lua_State* state) {
+  l_assertType(state, 1, l_graphics_isMesh);
+  l_graphics_Mesh * mesh = l_graphics_toMesh(state, 1);
+
+  bool use = l_tools_toBooleanOrError(state, 2);
+
+  graphics_Mesh_setVertexColors(mesh, use);
+
+  return 0;
+}
+
+
+static int l_graphics_Mesh_getVertexColors(lua_State *state) {
+  l_assertType(state, 1, l_graphics_isMesh);
+  l_graphics_Mesh * mesh = l_graphics_toMesh(state, 1);
+  lua_pushboolean(state, graphics_Mesh_getVertexColors(mesh));
+  return 1;
+}
+
+
 l_checkTypeFn(l_graphics_isMesh, moduleData.meshMT)
 l_toTypeFn(l_graphics_toMesh, l_graphics_Mesh)
 
@@ -151,6 +171,8 @@ static luaL_Reg const meshMetatableFuncs[] = {
   {"setImage",           l_graphics_Mesh_setTexture},
   {"getTexture",         l_graphics_Mesh_getTexture},
   {"getImage",           l_graphics_Mesh_getTexture},
+  {"setVertexColors",    l_graphics_Mesh_setVertexColors},
+  {"getVertexColors",    l_graphics_Mesh_getVertexColors},
   {NULL, NULL}
 };
 

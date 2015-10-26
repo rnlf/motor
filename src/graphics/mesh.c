@@ -176,3 +176,13 @@ void graphics_Mesh_draw(graphics_Mesh const* mesh, float x, float y, float r, fl
   );
 
 }
+
+
+void graphics_Mesh_setVertexColors(graphics_Mesh *mesh, bool use) {
+  mesh->useVertexColor = use;
+}
+
+
+bool graphics_Mesh_getVertexColors(graphics_Mesh const *mesh) {
+  return mesh->useVertexColor;
+}
