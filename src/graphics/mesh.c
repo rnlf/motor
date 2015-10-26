@@ -168,7 +168,7 @@ void graphics_Mesh_draw(graphics_Mesh const* mesh, float x, float y, float r, fl
     mesh->indexBufferSize / idxSize,
     mesh->drawMode,
     glTypes[idxSize-1],
-    color,
+    0, // color,
     1.0f,
     1.0f
   );

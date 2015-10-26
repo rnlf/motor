@@ -35,6 +35,7 @@ typedef struct {
     GLuint tex;
     GLuint color;
     GLuint size;
+    GLuint useVertCol;
   } uniformLocations;
 
   int uniformCount;

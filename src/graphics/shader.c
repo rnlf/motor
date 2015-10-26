@@ -21,6 +21,7 @@ static GLchar const vertexHeader[] =
   "uniform   mat4 motor2d_projection;\n"
   "uniform   mat2 motor2d_textureRect;\n"
   "uniform   vec2 motor2d_size;\n"
+  "uniform   bool motor2d_useVertexColor;\n"
   "#define extern uniform\n"
   "#define number float\n"
   "attribute vec2 motor2d_vPos;\n"
@@ -34,7 +35,11 @@ static GLchar const vertexFooter[] =
   "void main() {\n"
   "  gl_Position = position(motor2d_projection * motor2d_transform, vec4(motor2d_vPos * motor2d_size, 1.0, 1.0));\n"
   "  motor2d_fUV = motor2d_vUV * motor2d_textureRect[1] + motor2d_textureRect[0];\n"
-  "  motor2d_fColor = motor2d_vColor;\n"
+  "  if(useVertexColor) {\n"
+  "    motor2d_fColor = motor2d_vColor;\n"
+  "  } else {\n"
+  "    motor2d_fColor = vec4(1.0, 1.0, 1.0, 1.0);\n"
+  "  }\n"
   "}\n";
 
 static GLchar const *defaultFragmentSource =
@@ -196,6 +201,7 @@ static void readShaderUniforms(graphics_Shader *shader) {
   shader->uniformLocations.tex         = glGetUniformLocation(shader->program, DEFAULT_SAMPLER);
   shader->uniformLocations.color       = glGetUniformLocation(shader->program, "motor2d_color");
   shader->uniformLocations.size        = glGetUniformLocation(shader->program, "motor2d_size");
+  shader->uniformLocations.useVertCol  = glGetUniformLocation(shader->program, "motor2d_useVertexColor");
 
   int maxLength;
   glGetProgramiv(shader->program, GL_ACTIVE_UNIFORMS, &shader->uniformCount);
@@ -321,6 +327,7 @@ void graphics_Shader_activate(mat4x4 const* projection, mat4x4 const* transform,
   glUniform4fv(      moduleData.activeShader->uniformLocations.color,       1,                    useColor);
   glUniform2fv(      moduleData.activeShader->uniformLocations.size,        1,                    s);
   glUniformMatrix4fv(moduleData.activeShader->uniformLocations.transform,   1, 0, (GLfloat const*)transform);
+  glUniform1i(       moduleData.activeShader->uniformLocations.useVertCol,  useColor == 0);
 
   for(int i = 0; i < moduleData.activeShader->textureUnitCount; ++i) {
     glActiveTexture(GL_TEXTURE0 + moduleData.activeShader->textureUnits[i].unit);
