@@ -14,6 +14,7 @@
 #include "graphics_shader.h"
 #include "graphics_window.h"
 #include "graphics_geometry.h"
+#include "graphics_mesh.h"
 
 
 static int l_graphics_getBackgroundColor(lua_State* state) {
@@ -80,10 +81,13 @@ static const graphics_Quad defaultQuad = {
   .w = 1.0,
   .h = 1.0
 };
+
+
 static int l_graphics_draw(lua_State* state) {
   l_graphics_Image const * image = NULL;
   l_graphics_Batch const * batch = NULL;
   graphics_Canvas const * canvas = NULL;
+  l_graphics_Mesh const * mesh = NULL;
   graphics_Quad const * quad = &defaultQuad;
   int baseidx = 2;
 
@@ -93,8 +97,10 @@ static int l_graphics_draw(lua_State* state) {
     canvas = l_graphics_toCanvas(state, 1);
   } else if(l_graphics_isBatch(state, 1)) {
     batch = l_graphics_toBatch(state, 1);
+  } else if(l_graphics_isMesh(state, 1)) {
+    mesh = l_graphics_toMesh(state, 1);
   } else {
-    lua_pushstring(state, "expected image or spritebatch");
+    lua_pushstring(state, "expected canvas, image, spritebatch or mesh");
     lua_error(state);
   }
 
@@ -121,9 +127,12 @@ static int l_graphics_draw(lua_State* state) {
     graphics_Canvas_draw(canvas, quad, x, y, r, sx, sy, ox, oy, kx, ky);
   } else if(batch) {
     graphics_Batch_draw(&batch->batch, x, y, r, sx, sy, ox, oy, kx, ky);
+  } else if(mesh) {
+    graphics_Mesh_draw(&mesh->mesh, x, y, r, sx, sy, ox, oy, kx, ky);
   }
   return 0;
 }
+
 
 static int l_graphics_push(lua_State* state) {
   //printf(")) Push\n");
@@ -358,6 +367,7 @@ static luaL_Reg const regFuncs[] = {
 int l_graphics_register(lua_State* state) {
   l_tools_registerModule(state, "graphics", regFuncs);
   
+  l_graphics_mesh_register(state);
   l_graphics_image_register(state);
   l_graphics_quad_register(state);
   l_graphics_font_register(state);
