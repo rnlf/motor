@@ -30,7 +30,7 @@ static void ensureVertexBufferSize(size_t count) {
 }
 
 
-static void readVertex(lua_State* state, graphics_Vertex* out) {
+static void readVertex(lua_State* state, graphics_Vertex* out, bool *hasVertexColor) {
   if(!lua_istable(state, -1) || lua_objlen(state, -1) < 4) {
     lua_pushstring(state, "Table entry is not a vertex");
     lua_error(state); // does not return
@@ -50,12 +50,13 @@ static void readVertex(lua_State* state, graphics_Vertex* out) {
   for(int i = 4; i < 8; ++i) {
     lua_rawgeti(state, -1, i+1);
     t[i] = luaL_optnumber(state, -1, 255.0f) / 255.0f;
+    *hasVertexColor = (*hasVertexColor) || t[i] != 1.0f;
     lua_pop(state, 1);
   }
 }
 
 
-static size_t readVertices(lua_State* state) {
+static size_t readVertices(lua_State* state, bool *hasVertexColor) {
   if(!lua_istable(state, 1)) {
     lua_pushstring(state, "Need table of vertices");
     lua_error(state); // does not return
@@ -65,9 +66,10 @@ static size_t readVertices(lua_State* state) {
   size_t count = lua_objlen(state, 1);
   ensureVertexBufferSize(count);
 
+  *hasVertexColor = false;
   for(size_t i = 0; i < count; ++i) {
     lua_rawgeti(state, 1, i+1);
-    readVertex(state, moduleData.vertexBuffer + i);
+    readVertex(state, moduleData.vertexBuffer + i, hasVertexColor);
     lua_pop(state, 1);
   }
 
@@ -76,12 +78,14 @@ static size_t readVertices(lua_State* state) {
 
 
 static int l_graphics_newMesh(lua_State* state) {
-  size_t count = readVertices(state);
+  bool useVertexColor;
+  size_t count = readVertices(state, &useVertexColor);
+  printf("Has vertex color: %d\n", useVertexColor);
   graphics_Image const* texture = l_graphics_toTextureOrError(state, 2);
   graphics_MeshDrawMode mode = l_tools_toEnumOrError(state, 3, l_graphics_MeshDrawMode);
 
   l_graphics_Mesh* mesh = lua_newuserdata(state, sizeof(l_graphics_Mesh));
-  graphics_Mesh_new(&mesh->mesh, count, moduleData.vertexBuffer, texture, mode);
+  graphics_Mesh_new(&mesh->mesh, count, moduleData.vertexBuffer, texture, mode, useVertexColor);
 
   lua_pushvalue(state, 2);
   mesh->textureRef = luaL_ref(state, LUA_REGISTRYINDEX);
@@ -114,12 +118,11 @@ static int l_graphics_Mesh_getCount(lua_State* state) {
 
 static int l_graphics_Mesh_setTexture(lua_State* state) {
   l_assertType(state, 1, l_graphics_isMesh);
-  l_assertType(state, 2, l_graphics_isImage);
+  graphics_Image const* texture = l_graphics_toTextureOrError(state, 2);
 
   l_graphics_Mesh * mesh = l_graphics_toMesh(state, 1);
-  l_graphics_Image * image = l_graphics_toImage(state, 2);
 
-  mesh->mesh.texture = &image->image;
+  mesh->mesh.texture = texture;
   luaL_unref(state, LUA_REGISTRYINDEX, mesh->textureRef);
   lua_settop(state, 2);
   mesh->textureRef = luaL_ref(state, LUA_REGISTRYINDEX);
