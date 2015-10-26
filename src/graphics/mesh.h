@@ -23,10 +23,11 @@ typedef struct {
   void *indices;
   size_t indexBufferSize;
   bool customIndexBuffer;
+  bool useVertexColor;
 } graphics_Mesh;
 
 
-void graphics_Mesh_new(graphics_Mesh *mesh, size_t vertexCount, graphics_Vertex const* vertices, graphics_Image const* texture, graphics_MeshDrawMode mode);
+void graphics_Mesh_new(graphics_Mesh *mesh, size_t vertexCount, graphics_Vertex const* vertices, graphics_Image const* texture, graphics_MeshDrawMode mode, bool useVertexColor);
 void graphics_Mesh_free(graphics_Mesh *mesh);
 void graphics_Mesh_setVertices(graphics_Mesh *mesh, size_t vertexCount, graphics_Vertex const* vertices);
 void graphics_Mesh_setVertexMap(graphics_Mesh *mesh, size_t count, uint32_t const* indices);

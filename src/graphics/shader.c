@@ -35,7 +35,7 @@ static GLchar const vertexFooter[] =
   "void main() {\n"
   "  gl_Position = position(motor2d_projection * motor2d_transform, vec4(motor2d_vPos * motor2d_size, 1.0, 1.0));\n"
   "  motor2d_fUV = motor2d_vUV * motor2d_textureRect[1] + motor2d_textureRect[0];\n"
-  "  if(useVertexColor) {\n"
+  "  if(motor2d_useVertexColor) {\n"
   "    motor2d_fColor = motor2d_vColor;\n"
   "  } else {\n"
   "    motor2d_fColor = vec4(1.0, 1.0, 1.0, 1.0);\n"
@@ -315,6 +315,7 @@ void graphics_Shader_free(graphics_Shader* shader) {
   free(shader->uniforms);
 }
 
+float const defaultColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
 void graphics_Shader_activate(mat4x4 const* projection, mat4x4 const* transform, graphics_Quad const* textureRect, float const* useColor, float ws, float hs) {
 
   glUseProgram(moduleData.activeShader->program);
@@ -324,7 +325,7 @@ void graphics_Shader_activate(mat4x4 const* projection, mat4x4 const* transform,
   glUniform1i(       moduleData.activeShader->uniformLocations.tex,               0);
   glUniformMatrix4fv(moduleData.activeShader->uniformLocations.projection,  1, 0, (GLfloat const*)projection);
   glUniformMatrix2fv(moduleData.activeShader->uniformLocations.textureRect, 1, 0, (GLfloat const*)textureRect);
-  glUniform4fv(      moduleData.activeShader->uniformLocations.color,       1,                    useColor);
+  glUniform4fv(      moduleData.activeShader->uniformLocations.color,       1,                    useColor ? useColor : defaultColor);
   glUniform2fv(      moduleData.activeShader->uniformLocations.size,        1,                    s);
   glUniformMatrix4fv(moduleData.activeShader->uniformLocations.transform,   1, 0, (GLfloat const*)transform);
   glUniform1i(       moduleData.activeShader->uniformLocations.useVertCol,  useColor == 0);

@@ -3,12 +3,14 @@
 #include "mesh.h"
 #include "graphics.h"
 
-void graphics_Mesh_new(graphics_Mesh *mesh, size_t vertexCount, graphics_Vertex const* vertices, graphics_Image const* texture, graphics_MeshDrawMode mode) {
+void graphics_Mesh_new(graphics_Mesh *mesh, size_t vertexCount, graphics_Vertex const* vertices, graphics_Image const* texture, graphics_MeshDrawMode mode, bool useVertexColor) {
   mesh->texture = texture;
   mesh->drawMode = mode;
 
   mesh->vertices = 0;
   mesh->indices = 0;
+
+  mesh->useVertexColor = useVertexColor;
 
   mesh->customIndexBuffer = false;
 
@@ -149,6 +151,7 @@ void graphics_Mesh_setVertexMap(graphics_Mesh *mesh, size_t count, uint32_t cons
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->indexBufferSize, mesh->indices, GL_DYNAMIC_DRAW);
 }
 
+
 static graphics_Quad const fullQuad = {0.0f, 0.0f, 1.0f, 1.0f};
 static GLenum const glTypes[] = {GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT, 0, GL_UNSIGNED_INT};
 void graphics_Mesh_draw(graphics_Mesh const* mesh, float x, float y, float r, float sx, float sy, float ox, float oy, float kx, float ky) {
@@ -158,7 +161,6 @@ void graphics_Mesh_draw(graphics_Mesh const* mesh, float x, float y, float r, fl
   mat4x4 tr2d;
   m4x4_newTransform2d(&tr2d, x, y, r, sx, sy, ox, oy, kx, ky);
 
-  float const color[] = {1.0f, 1.0f, 1.0f, 1.0f};
   size_t idxSize = indexSize(mesh);
   graphics_drawArray(
     &fullQuad,
@@ -168,7 +170,7 @@ void graphics_Mesh_draw(graphics_Mesh const* mesh, float x, float y, float r, fl
     mesh->indexBufferSize / idxSize,
     mesh->drawMode,
     glTypes[idxSize-1],
-    color,
+    mesh->useVertexColor ? 0 : graphics_getColor(),
     1.0f,
     1.0f
   );
