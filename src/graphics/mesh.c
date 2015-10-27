@@ -4,12 +4,16 @@
 #include "graphics.h"
 #include "../math/minmax.h"
 
+// TODO: What happens when changing the number of vertices after setting a custom vertex map or draw range?
+// TODO: Apparently, LOVE does nothing about this situation, so that's what I'm gonna do, to.
+
 void graphics_Mesh_new(graphics_Mesh *mesh, size_t vertexCount, graphics_Vertex const* vertices, graphics_Image const* texture, graphics_MeshDrawMode mode, bool useVertexColor) {
   mesh->texture = texture;
   mesh->drawMode = mode;
 
   mesh->vertices = 0;
   mesh->indices = 0;
+  mesh->indexBufferSize = 0;
 
   mesh->useVertexColor = useVertexColor;
   mesh->useDrawRange = false;
@@ -81,8 +85,12 @@ static void createDefaultIndexBuffer(graphics_Mesh *mesh) {
   mesh->customIndexBuffer = false;
 
   size_t idxSize = indexSize(mesh);
-  mesh->indexBufferSize = idxSize * mesh->vertexCount;
-  mesh->indices = realloc(mesh->indices, mesh->indexBufferSize);
+  size_t newSize = idxSize * mesh->vertexCount;
+  if(newSize != mesh->indexBufferSize) {
+    free(mesh->indices);
+    mesh->indices = malloc(newSize);
+    mesh->indexBufferSize = newSize;
+  }
 
   switch(idxSize) {
   case 1:
@@ -101,10 +109,10 @@ static void createDefaultIndexBuffer(graphics_Mesh *mesh) {
 
 
 #define makeFillCustomIndexBufferFunc(type)                                                      \
-  static void fillCustomIndexBuffer_ ## type(void *out, size_t count, uint32_t const* indices) { \
-    type *t = (type*)out;                                                                        \
+  static void fillCustomIndexBuffer_ ## type(graphics_Mesh *out, size_t count, uint32_t const* indices) { \
+    type *t = (type*)out->indices;                                                                        \
     for(size_t i = 0; i < count; ++i) {                                                          \
-      t[i] = (type)i;                                                                          \
+      t[i] = (type)indices[i];                                                                          \
     }                                                                                            \
   }
 makeFillCustomIndexBufferFunc(uint8_t)
@@ -116,8 +124,12 @@ static void createCustomIndexBuffer(graphics_Mesh *mesh, size_t count, uint32_t 
   mesh->customIndexBuffer = true;
 
   size_t idxSize = indexSize(mesh);
-  mesh->indexBufferSize = idxSize * count;
-  mesh->indices = realloc(mesh->indices, mesh->indexBufferSize);
+  size_t newSize = idxSize * count;
+  if(newSize != mesh->indexBufferSize) {
+    free(mesh->indices);
+    mesh->indices = malloc(newSize);
+    mesh->indexBufferSize = newSize;
+  }
 
   switch(idxSize) {
   case 1:
@@ -145,6 +157,15 @@ void graphics_Mesh_setVertexMap(graphics_Mesh *mesh, size_t count, uint32_t cons
 }
 
 
+// Somewhat weird interface: return type must be cast to pointer to smallest unsigned
+// integer const that can represent the value returned in *count.
+// Weird, but efficient!
+void const* graphics_Mesh_getVertexMap(graphics_Mesh const* mesh, size_t *count) {
+  *count = mesh->indexBufferSize;
+  return mesh->indices;
+}
+
+
 static graphics_Quad const fullQuad = {0.0f, 0.0f, 1.0f, 1.0f};
 static GLenum const glTypes[] = {GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT, 0, GL_UNSIGNED_INT};
 void graphics_Mesh_draw(graphics_Mesh const* mesh, float x, float y, float r, float sx, float sy, float ox, float oy, float kx, float ky) {
@@ -155,8 +176,10 @@ void graphics_Mesh_draw(graphics_Mesh const* mesh, float x, float y, float r, fl
   m4x4_newTransform2d(&tr2d, x, y, r, sx, sy, ox, oy, kx, ky);
 
   int start = clamp(mesh->useDrawRange ? mesh->drawStart : 0, 0, mesh->indexBufferSize);
-  int end   = clamp(mesh->useDrawRange ? mesh->drawEnd : mesh->indexBufferSize, start, mesh->indexBufferSize);
+  int end   = clamp(mesh->useDrawRange ? mesh->drawEnd : mesh->indexBufferSize - 1, start, mesh->indexBufferSize - 1);
   int count = end - start + 1;
+
+  printf("%d, %d, %d\n", start, end, count);
 
   size_t idxSize = indexSize(mesh);
   graphics_drawArray(

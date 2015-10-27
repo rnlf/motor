@@ -17,15 +17,15 @@ static const l_tools_Enum l_graphics_MeshDrawMode[] = {
 
 static struct {
   int meshMT;
-  graphics_Vertex* vertexBuffer;
-  size_t vertexBufferSize;
+  void* buffer;
+  size_t bufferSize;
 } moduleData;
 
 
-static void ensureVertexBufferSize(size_t count) {
-  if(moduleData.vertexBufferSize < count) {
-    free(moduleData.vertexBuffer);
-    moduleData.vertexBuffer = malloc(count * sizeof(graphics_Vertex));
+static void ensureBufferSize(size_t size) {
+  if(moduleData.bufferSize < size) {
+    free(moduleData.buffer);
+    moduleData.buffer = malloc(size); // count * sizeof(graphics_Vertex));
   }
 }
 
@@ -55,20 +55,20 @@ static void readVertex(lua_State* state, graphics_Vertex* out, bool *hasVertexCo
 }
 
 
-static size_t readVertices(lua_State* state, bool *hasVertexColor) {
+static size_t readVertices(lua_State* state, bool *hasVertexColor, int base) {
   if(!lua_istable(state, 1)) {
     lua_pushstring(state, "Need table of vertices");
     lua_error(state); // does not return
     return 0;         // hint the compiler
   }
 
-  size_t count = lua_objlen(state, 1);
-  ensureVertexBufferSize(count);
+  size_t count = lua_objlen(state, base);
+  ensureBufferSize(count * sizeof(graphics_Vertex));
 
   *hasVertexColor = false;
   for(size_t i = 0; i < count; ++i) {
-    lua_rawgeti(state, 1, i+1);
-    readVertex(state, moduleData.vertexBuffer + i, hasVertexColor);
+    lua_rawgeti(state, base, i+1);
+    readVertex(state, ((graphics_Vertex*)moduleData.buffer) + i, hasVertexColor);
     lua_pop(state, 1);
   }
 
@@ -78,12 +78,12 @@ static size_t readVertices(lua_State* state, bool *hasVertexColor) {
 
 static int l_graphics_newMesh(lua_State* state) {
   bool useVertexColor;
-  size_t count = readVertices(state, &useVertexColor);
+  size_t count = readVertices(state, &useVertexColor, 1);
   graphics_Image const* texture = l_graphics_toTextureOrError(state, 2);
   graphics_MeshDrawMode mode = l_tools_toEnumOrError(state, 3, l_graphics_MeshDrawMode);
 
   l_graphics_Mesh* mesh = lua_newuserdata(state, sizeof(l_graphics_Mesh));
-  graphics_Mesh_new(&mesh->mesh, count, moduleData.vertexBuffer, texture, mode, useVertexColor);
+  graphics_Mesh_new(&mesh->mesh, count, (graphics_Vertex*)moduleData.buffer, texture, mode, useVertexColor);
 
   lua_pushvalue(state, 2);
   mesh->textureRef = luaL_ref(state, LUA_REGISTRYINDEX);
@@ -193,6 +193,72 @@ static int l_graphics_Mesh_getDrawRange(lua_State *state) {
 }
 
 
+static int l_graphics_Mesh_setVertexMap(lua_State *state) {
+  l_assertType(state, 1, l_graphics_isMesh);
+  l_graphics_Mesh *mesh = l_graphics_toMesh(state, 1);
+  
+  size_t top = (size_t)lua_gettop(state);
+  if(top == 1) {
+    graphics_Mesh_setVertexMap(&mesh->mesh, 0, 0);
+    return 0;
+  } 
+  
+  size_t count;
+  if(top > 2) {
+    ensureBufferSize(sizeof(uint32_t) * (top - 1));
+    for(int i = 0; i < top - 1; ++i) {
+      ((uint32_t*)moduleData.buffer)[i] = (uint32_t)l_tools_toNumberOrError(state, i + 2) - 1;
+      printf("Index: %d\n", ((uint32_t*)moduleData.buffer)[i]);
+    }
+    count = top - 1;
+  } else {
+    size_t len = (size_t)lua_objlen(state, 2);
+    ensureBufferSize(len * sizeof(uint32_t));
+    for(int i = 0; i < len; ++i) {
+      lua_rawgeti(state, 2, i+1);
+      ((uint32_t*)moduleData.buffer)[i] = (uint32_t)l_tools_toNumberOrError(state, -1) - 1;
+    }
+    count = len;
+  }
+
+  graphics_Mesh_setVertexMap(&mesh->mesh, count, (uint32_t*)moduleData.buffer);
+
+  return 0;
+}
+
+
+#define makePushVertexMapFunc(type)                                                     \
+  static void pushVertexMap_ ## type(lua_State *state, void const* buf, size_t count) { \
+    type const* b = (type const*)buf;                                                   \
+    for(size_t i = 0; i < count; ++i) {                                                 \
+      lua_pushnumber(state, ((int)b[i]) + 1);                                           \
+      lua_rawseti(state, -2, i+1);                                                      \
+    }                                                                                   \
+  }
+makePushVertexMapFunc(uint8_t)
+makePushVertexMapFunc(uint16_t)
+makePushVertexMapFunc(uint32_t)
+#undef makePushVertexMapFunc
+
+static int l_graphics_Mesh_getVertexMap(lua_State *state) {
+  l_assertType(state, 1, l_graphics_isMesh);
+  l_graphics_Mesh const* mesh = l_graphics_toMesh(state, 1);
+  
+  size_t count;
+  void const* buf = graphics_Mesh_getVertexMap(&mesh->mesh, &count);
+  lua_createtable(state, count, 0);
+  if(count > 0xFFFF) {
+    pushVertexMap_uint32_t(state, buf, count);
+  } else if(count > 0xFF) {
+    pushVertexMap_uint16_t(state, buf, count);
+  } else {
+    pushVertexMap_uint8_t(state, buf, count);
+  }
+  
+  return 1;
+}
+
+
 l_checkTypeFn(l_graphics_isMesh, moduleData.meshMT)
 l_toTypeFn(l_graphics_toMesh, l_graphics_Mesh)
 
@@ -207,6 +273,8 @@ static luaL_Reg const meshMetatableFuncs[] = {
   {"getVertexColors",    l_graphics_Mesh_getVertexColors},
   {"setDrawRange",       l_graphics_Mesh_setDrawRange},
   {"getDrawRange",       l_graphics_Mesh_getDrawRange},
+  {"setVertexMap",       l_graphics_Mesh_setVertexMap},
+  {"getVertexMap",       l_graphics_Mesh_getVertexMap},
   {NULL, NULL}
 };
 

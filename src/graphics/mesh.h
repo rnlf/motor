@@ -34,6 +34,7 @@ void graphics_Mesh_new(graphics_Mesh *mesh, size_t vertexCount, graphics_Vertex 
 void graphics_Mesh_free(graphics_Mesh *mesh);
 void graphics_Mesh_setVertices(graphics_Mesh *mesh, size_t vertexCount, graphics_Vertex const* vertices);
 void graphics_Mesh_setVertexMap(graphics_Mesh *mesh, size_t count, uint32_t const* indices);
+void const* graphics_Mesh_getVertexMap(graphics_Mesh const* mesh, size_t* count);
 void graphics_Mesh_draw(graphics_Mesh const* mesh, float x, float y, float r, float sx, float sy, float ox, float oy, float kx, float ky);
 void graphics_Mesh_setVertexColors(graphics_Mesh *mesh, bool use);
 bool graphics_Mesh_getVertexColors(graphics_Mesh const *mesh);
