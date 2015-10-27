@@ -41,7 +41,6 @@ static void readVertex(lua_State* state, graphics_Vertex* out, bool *hasVertexCo
   float *t = (float*)out;
 
   for(int i = 0; i < 4; ++i) {
-    printf("I=%d\n", i);
     lua_rawgeti(state, -1, i+1);
     t[i] = l_tools_toNumberOrError(state, -1);
     lua_pop(state, 1);
@@ -80,7 +79,6 @@ static size_t readVertices(lua_State* state, bool *hasVertexColor) {
 static int l_graphics_newMesh(lua_State* state) {
   bool useVertexColor;
   size_t count = readVertices(state, &useVertexColor);
-  printf("Has vertex color: %d\n", useVertexColor);
   graphics_Image const* texture = l_graphics_toTextureOrError(state, 2);
   graphics_MeshDrawMode mode = l_tools_toEnumOrError(state, 3, l_graphics_MeshDrawMode);
 
@@ -167,8 +165,8 @@ static int l_graphics_Mesh_setDrawRange(lua_State *state) {
 
   int top = lua_gettop(state);
   if(top == 3) {
-    int idx1 = l_tools_toNumberOrError(state, 2);
-    int idx2 = l_tools_toNumberOrError(state, 3);
+    int idx1 = l_tools_toNumberOrError(state, 2) - 1;
+    int idx2 = l_tools_toNumberOrError(state, 3) - 1;
     graphics_Mesh_setDrawRange(&mesh->mesh, idx1, idx2);
   } else if(top == 1) {
     graphics_Mesh_resetDrawRange(&mesh->mesh);

@@ -148,7 +148,7 @@ void graphics_swap(void) {
 //#endif
 }
 
-void graphics_drawArray(graphics_Quad const* quad, mat4x4 const* tr2d, GLuint vao, GLuint ibo, GLuint count, GLenum type, GLenum indexType, float const* useColor, float ws, float hs) {
+void graphics_drawArray(graphics_Quad const* quad, mat4x4 const* tr2d, GLuint vao, GLuint ibo, GLuint offset, GLuint count, GLenum type, GLenum indexType, float const* useColor, float ws, float hs) {
 
   mat4x4 tr;
   //m4x4_mul_m4x4(&tr, matrixstack_head(), tr2d);
@@ -165,7 +165,7 @@ void graphics_drawArray(graphics_Quad const* quad, mat4x4 const* tr2d, GLuint va
 
   glBindVertexArray(vao);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-  glDrawElements(type, count, indexType, 0);
+  glDrawElements(type, count, indexType, offset);
 }
 
 int graphics_getWidth(void) {
