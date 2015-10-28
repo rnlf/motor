@@ -165,7 +165,7 @@ void graphics_drawArray(graphics_Quad const* quad, mat4x4 const* tr2d, GLuint va
 
   glBindVertexArray(vao);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-  glDrawElements(type, count, indexType, offset);
+  glDrawElements(type, count, indexType, (GLvoid const*)offset);
 }
 
 int graphics_getWidth(void) {
