@@ -56,7 +56,7 @@ static void readVertex(lua_State* state, graphics_Vertex* out, bool *hasVertexCo
 
 
 static size_t readVertices(lua_State* state, bool *hasVertexColor, int base) {
-  if(!lua_istable(state, 1)) {
+  if(!lua_istable(state, base)) {
     lua_pushstring(state, "Need table of vertices");
     lua_error(state); // does not return
     return 0;         // hint the compiler
@@ -259,6 +259,45 @@ static int l_graphics_Mesh_getVertexMap(lua_State *state) {
 }
 
 
+static int l_graphics_Mesh_setVertices(lua_State* state) {
+  l_assertType(state, 1, l_graphics_isMesh);
+  l_graphics_Mesh *mesh = l_graphics_toMesh(state, 1);
+
+  bool hasColor;
+  size_t count = readVertices(state, &hasColor, 2);
+
+  graphics_Mesh_setVertices(&mesh->mesh, count, (graphics_Vertex const*)moduleData.buffer);
+
+  return 0;
+}
+
+
+static int l_graphics_Mesh_getVertices(lua_State* state) {
+  l_assertType(state, 1, l_graphics_isMesh);
+  l_graphics_Mesh const* mesh = l_graphics_toMesh(state, 1);
+
+  size_t count;
+  graphics_Vertex const *vertices = graphics_Mesh_getVertices(&mesh->mesh, &count);
+
+  lua_createtable(state, count, 0);
+  for(size_t i = 0; i < count; ++i) {
+    lua_createtable(state, 8, 0);
+    float const *vertex = (float const*)(vertices+i);
+    for(size_t j = 0; j < 4; ++j) {
+      lua_pushnumber(state, vertex[j]);
+      lua_rawseti(state, -2, j + 1);
+    }
+    for(size_t j = 4; j < 8; ++j) {
+      lua_pushnumber(state, floor(vertex[j] * 255.0f));
+      lua_rawseti(state, -2, j + 1);
+    }
+    lua_rawseti(state, -2, i + 1);
+  }
+
+  return 1;
+}
+
+
 l_checkTypeFn(l_graphics_isMesh, moduleData.meshMT)
 l_toTypeFn(l_graphics_toMesh, l_graphics_Mesh)
 
@@ -275,6 +314,8 @@ static luaL_Reg const meshMetatableFuncs[] = {
   {"getDrawRange",       l_graphics_Mesh_getDrawRange},
   {"setVertexMap",       l_graphics_Mesh_setVertexMap},
   {"getVertexMap",       l_graphics_Mesh_getVertexMap},
+  {"setVertices",        l_graphics_Mesh_setVertices},
+  {"getVertices",        l_graphics_Mesh_getVertices},
   {NULL, NULL}
 };
 

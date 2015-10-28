@@ -48,14 +48,26 @@ void graphics_Mesh_free(graphics_Mesh *mesh) {
 void graphics_Mesh_setVertices(graphics_Mesh *mesh, size_t vertexCount, graphics_Vertex const* vertices) {
   glBindBuffer(GL_ARRAY_BUFFER, mesh->vertexBuffer);
   glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(graphics_Vertex), vertices, GL_DYNAMIC_DRAW);
-  mesh->vertices = realloc(mesh->vertices, sizeof(graphics_Vertex) * vertexCount);
-  memcpy(mesh->vertices, vertices, vertexCount);
-  mesh->vertexCount = vertexCount;
+
+  if(mesh->vertexCount != vertexCount) {
+    free(mesh->vertices);
+    mesh->vertices = malloc(sizeof(graphics_Vertex) * vertexCount);
+    mesh->vertexCount = vertexCount;
+  }
+
+  memcpy(mesh->vertices, vertices, vertexCount * sizeof(graphics_Vertex));
 
   if(!mesh->customIndexBuffer) {
     graphics_Mesh_setVertexMap(mesh, 0, 0);
   }
 }
+
+
+graphics_Vertex const* graphics_Mesh_getVertices(graphics_Mesh const* mesh, size_t *count) {
+  *count = mesh->vertexCount;
+  return mesh->vertices;
+}
+
 
 
 #define makeFillDefaultIndexBufferFunc(type)                             \
