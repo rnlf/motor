@@ -298,6 +298,56 @@ static int l_graphics_Mesh_getVertices(lua_State* state) {
 }
 
 
+static int l_graphics_Mesh_getVertex(lua_State* state) {
+  l_assertType(state, 1, l_graphics_isMesh);
+  l_graphics_Mesh const* mesh = l_graphics_toMesh(state, 1);
+
+  size_t index = l_tools_toNumberOrError(state, 2) - 1;
+
+  graphics_Vertex const* vertex = graphics_Mesh_getVertex(&mesh->mesh, index);
+  float const* vf = (float const*)vertex;
+
+  for(size_t j = 0; j < 4; ++j) {
+    lua_pushnumber(state, vf[j]);
+  }
+  for(size_t j = 4; j < 8; ++j) {
+    lua_pushnumber(state, floor(vf[j] * 255.0f));
+  }
+
+  return 8;
+}
+
+
+static int l_graphics_Mesh_setVertex(lua_State* state) {
+  l_assertType(state, 1, l_graphics_isMesh);
+  l_graphics_Mesh * mesh = l_graphics_toMesh(state, 1);
+
+  size_t index = l_tools_toNumberOrError(state, 2) - 1;
+
+  graphics_Vertex v;
+  float *vf = (float*)&v;
+  for(int i = 0; i < 4; ++i) {
+    vf[i] = l_tools_toNumberOrError(state, i+3);
+  }
+  for(int i = 4; i < 8; ++i) {
+    vf[i] = luaL_optnumber(state, i+3, 255.0f) / 255.0f;
+  }
+
+  graphics_Mesh_setVertex(&mesh->mesh, index, &v);
+
+  return 0;
+}
+
+
+static int l_graphics_Mesh_getVertexCount(lua_State *state) {
+  l_assertType(state, 1, l_graphics_isMesh);
+  l_graphics_Mesh const *mesh = l_graphics_toMesh(state, 1);
+
+  lua_pushnumber(state, graphics_Mesh_getVertexCount(&mesh->mesh));
+  return 1;
+}
+
+
 l_checkTypeFn(l_graphics_isMesh, moduleData.meshMT)
 l_toTypeFn(l_graphics_toMesh, l_graphics_Mesh)
 
@@ -316,6 +366,9 @@ static luaL_Reg const meshMetatableFuncs[] = {
   {"getVertexMap",       l_graphics_Mesh_getVertexMap},
   {"setVertices",        l_graphics_Mesh_setVertices},
   {"getVertices",        l_graphics_Mesh_getVertices},
+  {"getVertex",          l_graphics_Mesh_getVertex},
+  {"setVertex",          l_graphics_Mesh_setVertex},
+  {"getVertexCount",     l_graphics_Mesh_getVertexCount},
   {NULL, NULL}
 };
 

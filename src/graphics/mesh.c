@@ -191,8 +191,6 @@ void graphics_Mesh_draw(graphics_Mesh const* mesh, float x, float y, float r, fl
   int end   = clamp(mesh->useDrawRange ? mesh->drawEnd : mesh->indexBufferSize - 1, start, mesh->indexBufferSize - 1);
   int count = end - start + 1;
 
-  printf("%d, %d, %d\n", start, end, count);
-
   size_t idxSize = indexSize(mesh);
   graphics_drawArray(
     &fullQuad,
@@ -207,7 +205,6 @@ void graphics_Mesh_draw(graphics_Mesh const* mesh, float x, float y, float r, fl
     1.0f,
     1.0f
   );
-
 }
 
 
@@ -240,4 +237,21 @@ bool graphics_Mesh_getDrawRange(graphics_Mesh const* mesh, int *min, int *max) {
     return true;
   }
   return false;
+}
+
+
+graphics_Vertex const* graphics_Mesh_getVertex(graphics_Mesh const *mesh, size_t index) {
+  return mesh->vertices + index;
+}
+
+
+void graphics_Mesh_setVertex(graphics_Mesh *mesh, size_t index, graphics_Vertex const *vertex) {
+  memcpy(mesh->vertices + index, vertex, sizeof(*vertex));
+  glBindBuffer(GL_ARRAY_BUFFER, mesh->vertexBuffer);
+  glBufferSubData(GL_ARRAY_BUFFER, index * sizeof(*vertex), sizeof(*vertex), vertex);
+}
+
+
+size_t graphics_Mesh_getVertexCount(graphics_Mesh const *mesh) {
+  return mesh->vertexCount;
 }
