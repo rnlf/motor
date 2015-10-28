@@ -42,7 +42,7 @@ float* graphics_getColor(void);
 float* graphics_getBackgroundColor(void);
 void graphics_clear(void);
 void graphics_swap(void);
-void graphics_drawArray(graphics_Quad const* quad, mat4x4 const* tr2d, GLuint vao, GLuint ibo, GLuint count, GLenum type, GLenum indexType, float const * useColor, float ws, float hs);
+void graphics_drawArray(graphics_Quad const* quad, mat4x4 const* tr2d, GLuint vao, GLuint ibo, GLuint offset, GLuint count, GLenum type, GLenum indexType, float const * useColor, float ws, float hs);
 int graphics_getWidth(void);
 int graphics_getHeight(void);
 void graphics_setColorMask(bool r, bool g, bool b, bool a);
