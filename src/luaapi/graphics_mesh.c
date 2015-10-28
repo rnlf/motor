@@ -103,17 +103,6 @@ static int l_graphics_gcMesh(lua_State* state) {
 }
 
 
-static int l_graphics_Mesh_getCount(lua_State* state) {
-  l_assertType(state, 1, l_graphics_isMesh);
-
-  l_graphics_Mesh * mesh = l_graphics_toMesh(state, 1);
-
-  lua_pushnumber(state, mesh->mesh.vertexCount);
-
-  return 1;
-}
-
-
 static int l_graphics_Mesh_setTexture(lua_State* state) {
   l_assertType(state, 1, l_graphics_isMesh);
   graphics_Image const* texture = l_graphics_toTextureOrError(state, 2);
@@ -353,7 +342,6 @@ l_toTypeFn(l_graphics_toMesh, l_graphics_Mesh)
 
 static luaL_Reg const meshMetatableFuncs[] = {
   {"__gc",               l_graphics_gcMesh},
-  {"getCount",           l_graphics_Mesh_getCount},
   {"setTexture",         l_graphics_Mesh_setTexture},
   {"setImage",           l_graphics_Mesh_setTexture},
   {"getTexture",         l_graphics_Mesh_getTexture},
