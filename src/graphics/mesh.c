@@ -255,3 +255,13 @@ void graphics_Mesh_setVertex(graphics_Mesh *mesh, size_t index, graphics_Vertex 
 size_t graphics_Mesh_getVertexCount(graphics_Mesh const *mesh) {
   return mesh->vertexCount;
 }
+
+
+void graphics_Mesh_setDrawMode(graphics_Mesh *mesh, graphics_MeshDrawMode mode) {
+  mesh->drawMode = mode;
+}
+
+
+graphics_MeshDrawMode graphics_Mesh_getDrawMode(graphics_Mesh const *mesh) {
+  return mesh->drawMode;
+}
