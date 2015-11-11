@@ -65,10 +65,11 @@ sources = [
   'math/util.c',
   'math/vector.c',
   'errorhandler.c',
+  'keyboard.c',
+  'joystick.c',
   'main.c',
   'motor.c',
   'mouse.c',
-  'keyboard.c',
   'tools/utf8.c',
   'timer/timer.c',
 

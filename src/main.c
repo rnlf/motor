@@ -26,6 +26,7 @@
 
 #include "audio/audio.h"
 
+#include "joystick.h"
 #include "keyboard.h"
 #include "mouse.h"
 #include "image/imagedata.h"
@@ -130,6 +131,7 @@ int main() {
   l_boot(lua, &config);
 
   image_init();
+  joystick_init();
   keyboard_init();
   graphics_init(config.window.width, config.window.height);
   audio_init();

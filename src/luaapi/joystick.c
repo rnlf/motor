@@ -1,3 +1,4 @@
+#include "../joystick.h"
 #include "tools.h"
 
 static int l_joysticks_getJoysticks(lua_State* state) {
@@ -7,7 +8,7 @@ static int l_joysticks_getJoysticks(lua_State* state) {
 
 
 static int l_joysticks_getJoystickCount(lua_State* state) {
-  lua_pushnumber(state, 0);
+  lua_pushnumber(state, joystick_getCount());
   return 1;
 }
 
