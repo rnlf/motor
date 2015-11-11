@@ -86,6 +86,8 @@ static const vec2 batchQuadPts[4] = {
 
 int graphics_Batch_add(graphics_Batch* batch, graphics_Quad const* q, float x, float y, float r, float sx, float sy, float ox, float oy, float kx, float ky) {
 
+  // TODO: Remove bind/unbind, automatically flush when drawing
+
   if(batch->insertPos == batch->maxCount) {
     return -1;
   }
@@ -198,7 +200,7 @@ void graphics_Batch_draw(graphics_Batch const* batch,
   m4x4_newTransform2d(&tr2d, x, y, r, sx, sy, ox, oy, kx, ky);
   float const * color = batch->colorUsed ? defaultColor : graphics_getColor();
 
-  graphics_drawArray(&fullQuad, &tr2d, batch->vao, moduleData.sharedIndexBuffer, 0, batch->insertPos*6, GL_TRIANGLES, GL_UNSIGNED_SHORT, color, 1.0f, 1.0f);
+  graphics_drawArray(&fullQuad, &tr2d, batch->vao, moduleData.sharedIndexBuffer, 0, batch->insertPos*6, GL_TRIANGLES, GL_UNSIGNED_SHORT, color, 1.0f, 1.0f, batch->colorUsed);
 }
 
 void graphics_Batch_bind(graphics_Batch *batch) {

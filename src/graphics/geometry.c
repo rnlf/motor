@@ -74,7 +74,7 @@ static void drawBuffer(int vertices, int indices, GLenum type) {
   m4x4_newIdentity(&tr);
   graphics_Quad quad = {0,0,1,1};
 
-  graphics_drawArray(&quad, &tr, moduleData.dataVAO, moduleData.dataIBO, 0, indices, type, GL_UNSIGNED_SHORT, graphics_getColor(), 1, 1);
+  graphics_drawArray(&quad, &tr, moduleData.dataVAO, moduleData.dataIBO, 0, indices, type, GL_UNSIGNED_SHORT, graphics_getColor(), 1, 1, false);
 
   graphics_setShader(shader);
 }

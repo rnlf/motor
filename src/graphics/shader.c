@@ -316,7 +316,7 @@ void graphics_Shader_free(graphics_Shader* shader) {
 }
 
 float const defaultColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
-void graphics_Shader_activate(mat4x4 const* projection, mat4x4 const* transform, graphics_Quad const* textureRect, float const* useColor, float ws, float hs) {
+void graphics_Shader_activate(mat4x4 const* projection, mat4x4 const* transform, graphics_Quad const* textureRect, float const* useColor, float ws, float hs, bool useVertexColors) {
 
   glUseProgram(moduleData.activeShader->program);
 
@@ -328,7 +328,7 @@ void graphics_Shader_activate(mat4x4 const* projection, mat4x4 const* transform,
   glUniform4fv(      moduleData.activeShader->uniformLocations.color,       1,                    useColor ? useColor : defaultColor);
   glUniform2fv(      moduleData.activeShader->uniformLocations.size,        1,                    s);
   glUniformMatrix4fv(moduleData.activeShader->uniformLocations.transform,   1, 0, (GLfloat const*)transform);
-  glUniform1i(       moduleData.activeShader->uniformLocations.useVertCol,  useColor == 0);
+  glUniform1i(       moduleData.activeShader->uniformLocations.useVertCol,  useVertexColors);
 
   for(int i = 0; i < moduleData.activeShader->textureUnitCount; ++i) {
     glActiveTexture(GL_TEXTURE0 + moduleData.activeShader->textureUnits[i].unit);
