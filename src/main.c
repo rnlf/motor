@@ -90,13 +90,23 @@ void main_loop(void *data) {
       mouse_mousemoved(event.motion.x, event.motion.y);
       break;
     case SDL_MOUSEBUTTONDOWN:
-      mouse_mousepressed(event.button.x, event.button.y,
-      event.button.button);
+      mouse_mousepressed(event.button.x, event.button.y, event.button.button);
       break;
     case SDL_MOUSEBUTTONUP:
-      mouse_mousereleased(event.button.x, event.button.y,
-      event.button.button);
+      mouse_mousereleased(event.button.x, event.button.y, event.button.button);
       break;
+    case SDL_JOYDEVICEADDED:
+      joystick_deviceAdded(event.jdevice.which);
+      break;
+    case SDL_JOYDEVICEREMOVED:
+      joystick_deviceRemoved(event.jdevice.which);
+      break;
+    case SDL_JOYBUTTONUP:
+    case SDL_JOYBUTTONDOWN:
+      joystick_buttonEvent(event.jbutton.which, event.jbutton.button, event.jbutton.state);
+      break;
+
+
 #ifndef EMSCRIPTEN
     case SDL_QUIT:
       exit(0);
