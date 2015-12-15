@@ -148,10 +148,28 @@ static int l_audio_SourceCommon_setVolume(lua_State *state) {
   return 0;
 }
 
+
 static int l_audio_SourceCommon_getVolume(lua_State *state) {
   l_assertType(state, 1, isSource);
   audio_SourceCommon *source = (audio_SourceCommon*)lua_touserdata(state, 1);
   lua_pushnumber(state, audio_SourceCommon_getVolume(source));
+  return 1;
+}
+
+
+static int l_audio_SourceCommon_setPitch(lua_State *state) {
+  l_assertType(state, 1, isSource);
+  float pitch = l_tools_toNumberOrError(state, 2);
+  audio_SourceCommon *source = (audio_SourceCommon*)lua_touserdata(state, 1);
+  audio_SourceCommon_setPitch(source, pitch);
+  return 0;
+}
+
+
+static int l_audio_SourceCommon_getPitch(lua_State *state) {
+  l_assertType(state, 1, isSource);
+  audio_SourceCommon *source = (audio_SourceCommon*)lua_touserdata(state, 1);
+  lua_pushnumber(state, audio_SourceCommon_getPitch(source));
   return 1;
 }
 
@@ -195,6 +213,8 @@ static int l_audio_StaticSource_clone(lua_State *state) {
     {"setVolume",  l_audio_SourceCommon_setVolume}, \
     {"getVolume",  l_audio_SourceCommon_getVolume}, \
     {"clone",      l_audio_ ## type ## Source_clone}, \
+    {"setPitch",   l_audio_SourceCommon_setPitch}, \
+    {"getPitch",   l_audio_SourceCommon_getPitch}, \
     {NULL, NULL} \
   };
 t_sourceMetatableFuncs(Stream)

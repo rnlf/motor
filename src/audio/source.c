@@ -72,3 +72,15 @@ float audio_SourceCommon_getVolume(audio_SourceCommon const* source) {
   alGetSourcef(source->source, AL_GAIN, &gain);
   return gain;
 }
+
+
+float audio_SourceCommon_getPitch(audio_SourceCommon const* source) {
+  float gain;
+  alGetSourcef(source->source, AL_PITCH, &gain);
+  return gain;
+}
+
+
+void audio_SourceCommon_setPitch(audio_SourceCommon const* source, float gain) {
+  alSourcef(source->source, AL_PITCH, gain);
+}
