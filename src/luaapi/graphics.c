@@ -6,6 +6,7 @@
 #include "../graphics/shader.h"
 #include "image.h"
 
+#include "graphics_particlesystem.h"
 #include "graphics_batch.h"
 #include "graphics_canvas.h"
 #include "graphics_image.h"
@@ -84,10 +85,12 @@ static const graphics_Quad defaultQuad = {
 
 
 static int l_graphics_draw(lua_State* state) {
-  l_graphics_Image const * image = NULL;
-  l_graphics_Batch const * batch = NULL;
-  graphics_Canvas const * canvas = NULL;
-  l_graphics_Mesh const * mesh = NULL;
+  l_graphics_Image          const * image  = NULL;
+  l_graphics_Batch          const * batch  = NULL;
+  graphics_Canvas           const * canvas = NULL;
+  l_graphics_Mesh           const * mesh   = NULL;
+  l_graphics_ParticleSystem const * ps     = NULL;
+
   graphics_Quad const * quad = &defaultQuad;
   int baseidx = 2;
 
@@ -99,6 +102,8 @@ static int l_graphics_draw(lua_State* state) {
     batch = l_graphics_toBatch(state, 1);
   } else if(l_graphics_isMesh(state, 1)) {
     mesh = l_graphics_toMesh(state, 1);
+  } else if(l_graphics_isParticleSystem(state, 1)) {
+    ps = l_graphics_toParticleSystem(state, 1);
   } else {
     lua_pushstring(state, "expected canvas, image, spritebatch or mesh");
     lua_error(state);
@@ -129,6 +134,8 @@ static int l_graphics_draw(lua_State* state) {
     graphics_Batch_draw(&batch->batch, x, y, r, sx, sy, ox, oy, kx, ky);
   } else if(mesh) {
     graphics_Mesh_draw(&mesh->mesh, x, y, r, sx, sy, ox, oy, kx, ky);
+  } else if(ps) {
+    graphics_ParticleSystem_draw(&ps->particleSystem, x, y, r, sx, sy, ox, oy, kx, ky);
   }
   return 0;
 }
@@ -367,6 +374,7 @@ static luaL_Reg const regFuncs[] = {
 int l_graphics_register(lua_State* state) {
   l_tools_registerModule(state, "graphics", regFuncs);
   
+  l_graphics_particlesystem_register(state);
   l_graphics_mesh_register(state);
   l_graphics_image_register(state);
   l_graphics_quad_register(state);

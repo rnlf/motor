@@ -11,6 +11,7 @@
 #include "canvas.h"
 #include "shader.h"
 #include "geometry.h"
+#include "particlesystem.h"
 #ifdef EMSCRIPTEN
 # include <emscripten.h>
 #endif
@@ -106,6 +107,7 @@ void graphics_init(int width, int height) {
   graphics_batch_init();
   graphics_image_init();
   graphics_shader_init();
+  graphics_particlesystem_init();
 
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   glPixelStorei(GL_PACK_ALIGNMENT, 1);
@@ -148,7 +150,7 @@ void graphics_swap(void) {
 //#endif
 }
 
-void graphics_drawArray(graphics_Quad const* quad, mat4x4 const* tr2d, GLuint vao, GLuint ibo, GLuint offset, GLuint count, GLenum type, GLenum indexType, float const* useColor, float ws, float hs) {
+void graphics_drawArray(graphics_Quad const* quad, mat4x4 const* tr2d, GLuint vao, GLuint ibo, GLuint offset, GLuint count, GLenum type, GLenum indexType, float const* useColor, float ws, float hs, bool useVertexColors) {
 
   mat4x4 tr;
   //m4x4_mul_m4x4(&tr, matrixstack_head(), tr2d);
@@ -160,7 +162,8 @@ void graphics_drawArray(graphics_Quad const* quad, mat4x4 const* tr2d, GLuint va
     quad,
     useColor,
     ws,
-    hs
+    hs,
+    useVertexColors
   );
 
   glBindVertexArray(vao);

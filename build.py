@@ -5,8 +5,8 @@ import os
 import re
 import shutil
 
-optimize = 3
-link_time_optimize = 3
+optimize = 2
+link_time_optimize = 0
 
 sources = [
   'audio/audio.c',
@@ -25,6 +25,7 @@ sources = [
   'graphics/image.c',
   'graphics/matrixstack.c',
   'graphics/mesh.c',
+  'graphics/particlesystem.c',
   'graphics/quad.c',
   'graphics/shader.c',
   'image/imagedata.c',
@@ -45,6 +46,7 @@ sources = [
   'luaapi/graphics_geometry.c',
   'luaapi/graphics_image.c',
   'luaapi/graphics_mesh.c',
+  'luaapi/graphics_particlesystem.c',
   'luaapi/graphics_quad.c',
   'luaapi/graphics_shader.c',
   'luaapi/graphics_texture.c',
@@ -55,10 +57,12 @@ sources = [
   'luaapi/tools.c',
   'math/bezier.c',
   'math/gamma.c',
+  'math/lerp.c',
   'math/math.c',
   'math/minmax.c',
   'math/randomgenerator.c',
   'math/triangulate.c',
+  'math/util.c',
   'math/vector.c',
   'errorhandler.c',
   'main.c',

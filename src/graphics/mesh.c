@@ -179,6 +179,7 @@ void const* graphics_Mesh_getVertexMap(graphics_Mesh const* mesh, size_t *count)
 
 
 static graphics_Quad const fullQuad = {0.0f, 0.0f, 1.0f, 1.0f};
+static float const defaultColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
 static GLenum const glTypes[] = {GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT, 0, GL_UNSIGNED_INT};
 void graphics_Mesh_draw(graphics_Mesh const* mesh, float x, float y, float r, float sx, float sy, float ox, float oy, float kx, float ky) {
 
@@ -201,9 +202,10 @@ void graphics_Mesh_draw(graphics_Mesh const* mesh, float x, float y, float r, fl
     count,
     mesh->drawMode,
     glTypes[idxSize-1],
-    mesh->useVertexColor ? 0 : graphics_getColor(),
+    mesh->useVertexColor ? defaultColor : graphics_getColor(),
     1.0f,
-    1.0f
+    1.0f,
+    mesh->useVertexColor
   );
 }
 
@@ -254,4 +256,14 @@ void graphics_Mesh_setVertex(graphics_Mesh *mesh, size_t index, graphics_Vertex 
 
 size_t graphics_Mesh_getVertexCount(graphics_Mesh const *mesh) {
   return mesh->vertexCount;
+}
+
+
+void graphics_Mesh_setDrawMode(graphics_Mesh *mesh, graphics_MeshDrawMode mode) {
+  mesh->drawMode = mode;
+}
+
+
+graphics_MeshDrawMode graphics_Mesh_getDrawMode(graphics_Mesh const *mesh) {
+  return mesh->drawMode;
 }

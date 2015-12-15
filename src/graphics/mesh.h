@@ -46,3 +46,5 @@ bool graphics_Mesh_getDrawRange(graphics_Mesh const* mesh, int *min, int *max);
 graphics_Vertex const* graphics_Mesh_getVertex(graphics_Mesh const *mesh, size_t index);
 void graphics_Mesh_setVertex(graphics_Mesh *mesh, size_t index, graphics_Vertex const *vertex);
 size_t graphics_Mesh_getVertexCount(graphics_Mesh const *mesh);
+void graphics_Mesh_setDrawMode(graphics_Mesh *mesh, graphics_MeshDrawMode mode);
+graphics_MeshDrawMode graphics_Mesh_getDrawMode(graphics_Mesh const *mesh);

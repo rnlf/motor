@@ -337,6 +337,29 @@ static int l_graphics_Mesh_getVertexCount(lua_State *state) {
 }
 
 
+static int l_graphics_Mesh_setDrawMode(lua_State *state) {
+  l_assertType(state, 1, l_graphics_isMesh);
+  l_graphics_Mesh *mesh = l_graphics_toMesh(state, 1);
+  
+  graphics_MeshDrawMode mode = l_tools_toEnumOrError(state, 2, l_graphics_MeshDrawMode);
+
+  graphics_Mesh_setDrawMode(&mesh->mesh, mode);
+  return 0;
+}
+
+
+static int l_graphics_Mesh_getDrawMode(lua_State *state) {
+  l_assertType(state, 1, l_graphics_isMesh);
+  l_graphics_Mesh const *mesh = l_graphics_toMesh(state, 1);
+  
+  graphics_MeshDrawMode mode = graphics_Mesh_getDrawMode(&mesh->mesh);
+
+  l_tools_pushEnum(state, mode, l_graphics_MeshDrawMode);
+
+  return 1;
+}
+
+
 l_checkTypeFn(l_graphics_isMesh, moduleData.meshMT)
 l_toTypeFn(l_graphics_toMesh, l_graphics_Mesh)
 
@@ -357,6 +380,8 @@ static luaL_Reg const meshMetatableFuncs[] = {
   {"getVertex",          l_graphics_Mesh_getVertex},
   {"setVertex",          l_graphics_Mesh_setVertex},
   {"getVertexCount",     l_graphics_Mesh_getVertexCount},
+  {"getDrawMode",        l_graphics_Mesh_getDrawMode},
+  {"setDrawMode",        l_graphics_Mesh_setDrawMode},
   {NULL, NULL}
 };
 
