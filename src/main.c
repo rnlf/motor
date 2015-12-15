@@ -6,6 +6,7 @@
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
+#include <unistd.h>
 
 #include "luaapi/audio.h"
 #include "luaapi/graphics.h"
@@ -32,6 +33,7 @@
 #include "timer/timer.h"
 #include "math/math.h"
 #include "errorhandler.h"
+#include "filesystem/filesystem.h"
 
 
 typedef struct {
@@ -44,6 +46,8 @@ typedef struct {
 void main_loop(void *data) {
   MainLoopData* loopData = (MainLoopData*)data;
   // TODO use registry to get love.update and love.draw?
+
+  chdir("love");
 
   timer_step();
   graphics_clear();
@@ -127,7 +131,12 @@ int main() {
   l_event_register(lua);
   l_joystick_register(lua);
 
+  chdir("/love");
   l_boot(lua, &config);
+
+  if(config.identity) {
+    filesystem_setIdentity(config.identity, false);
+  }
 
   image_init();
   keyboard_init();

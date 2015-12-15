@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <string.h>
 #include <lauxlib.h>
 #include "boot.h"
 
@@ -16,7 +18,8 @@ static char const bootScript[] =
   "  window = {\n"
   "    width = 800,\n"
   "    height = 600\n"
-  "  }\n"
+  "  },\n"
+  "  modules = {}\n"
   "}\n"
   "local confFunc = loadfile(\"conf.lua\")\n"
   "if confFunc then\n"
@@ -30,6 +33,20 @@ int l_boot(lua_State* state, motor_Config *config) {
   if(luaL_dostring(state, bootScript)) {
     return 1;
   }
+
+  lua_pushstring(state, "identity");
+  lua_rawget(state, -2);
+  if(!lua_isnil(state, -1)) {
+    char const*id = lua_tostring(state, -1);
+    char *idc = malloc(strlen(id) + 1);
+    strcpy(idc, id);
+    config->identity = idc;
+    printf("identity set to %s\n", idc);
+  } else {
+    printf("identity not set\n");
+    config->identity = 0;
+  }
+  lua_pop(state, 1);
 
   lua_pushstring(state, "window");
   lua_rawget(state, -2);

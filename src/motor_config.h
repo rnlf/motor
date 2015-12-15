@@ -6,5 +6,6 @@ typedef struct {
 } motor_WindowConfig;
 
 typedef struct {
+  char const* identity;
   motor_WindowConfig window;
 } motor_Config;

@@ -21,19 +21,20 @@
     Module['addRunDependency']("zip game.love");
     zip.useWebWorkers=false;
 
+    Module['FS_createPath']("/", "love", 1, 1)
     zip.createReader(new zip.BlobReader(gameReq.response), function(reader) {
       reader.getEntries(function(entries) {
         var i;
         for(i=0; i < entries.length; ++i) {
           if(entries[i].directory) {
-            Module['FS_createPath']("/", entries[i].filename, 1, 1);
+            Module['FS_createPath']("/love/", entries[i].filename, 1, 1);
           } else {
             Module['addRunDependency']("fp " + entries[i].filename);
             entries[i].getData(
               new zip.ArrayBufferWriter(), 
               (function(entry) {
                 return function(data) {
-                  Module['FS_createPreloadedFile']("/" + entry.filename, null, new Uint8Array(data), true, true,
+                  Module['FS_createPreloadedFile']("/love/" + entry.filename, null, new Uint8Array(data), true, true,
                     function() { // ondone
                       Module['removeRunDependency']("fp " + entry.filename);
                     },
