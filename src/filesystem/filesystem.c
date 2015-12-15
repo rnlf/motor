@@ -37,12 +37,9 @@ static void buildFilename(char const* dir, char const* filename) {
 
 
 static bool statFile(char const* dir, char const* filename, struct stat *out) {
-  printf("Stat'ing %s in %s\n", filename, dir);
 
   buildFilename(dir, filename);
-  printf("Full name: xxx%sxxx\n", moduleData.nameBuffer);
   int st = stat(moduleData.nameBuffer, out);
-  printf("ERRNO: %d, st: %d\n", errno, st);
   return st == 0;
 }
 
@@ -71,7 +68,6 @@ void filesystem_setIdentity(char const* name, bool first) {
   moduleData.identityPath = realloc(moduleData.identityPath, strlen(name)+7);
   strcpy(moduleData.identityPath, "/save/");
   strcpy(moduleData.identityPath + 6, name);
-  printf("MKDIR: ''%s''\n", moduleData.identityPath);
   moduleData.identityFirst = first;
   mkdir("/save", 0755);
   mkdir(moduleData.identityPath, 0755);
@@ -103,7 +99,6 @@ int filesystem_read(char const* filename, int max, char** output) {
 
 
 bool filesystem_write(char const* filename, char const* data, int size) {
-  printf("Writing %s, %d to %s\n", data, size, filename);
 
   if(moduleData.identityPath == 0) {
     return false;
@@ -132,31 +127,43 @@ DIR* filesystem_openDir(char const* dirname, bool identity) {
 
   if(identity) {
     if(!statFile(moduleData.identityPath, dirname, &status)) {
-      printf("FAILED 1\n");
       return 0;
     }
   } else {
     if(!statFile("/love", dirname, &status)) {
-      printf("FAILED 2\n");
       return 0;
     }
   }
 
   if(!S_ISDIR(status.st_mode)) {
-    printf("NOT A DIR\n");
     return 0;
   }
 
-  printf("OKAY, I'M HERE\n");
   return opendir(moduleData.nameBuffer);
 }
 
 
 bool filesystem_isFile(char const* filename) {
-  printf("Checking %s for existence", filename);
   struct stat status;
-  
   bool exist = findFileRW(filename, &status);
-
   return exist && S_ISREG(status.st_mode);
+}
+
+
+bool filesystem_isDirectory(char const* filename) {
+  struct stat status;
+  bool exist = findFileRW(filename, &status);
+  return exist && S_ISDIR(status.st_mode);
+}
+
+
+bool filesystem_getLastModified(char const* filename, double *out) {
+  struct stat status;
+  if(!findFileRW(filename, &status)) {
+    return false;
+  }
+
+  *out = (double)status.st_mtim.tv_sec + ((double)status.st_mtim.tv_sec) / 1000000000.0;
+
+  return true;
 }

@@ -50,6 +50,14 @@ static int l_filesystem_load(lua_State* state) {
 }
 
 
+static int l_filesystem_isDirectory(lua_State* state) {
+  char const* filename = l_tools_toStringOrError(state, 1);
+  lua_pushboolean(state, filesystem_isDirectory(filename));
+  
+  return 1;
+}
+
+
 static int l_filesystem_isFile(lua_State* state) {
   char const* filename = l_tools_toStringOrError(state, 1);
   lua_pushboolean(state, filesystem_isFile(filename));
@@ -70,10 +78,10 @@ static int l_filesystem_setIdentity(lua_State* state) {
   return 0;
 }
 
+
 static void pushFilenames(lua_State* state, bool identity) {
   DIR* dir = filesystem_openDir(l_tools_toStringOrError(state, 1), identity);
   if(!dir) {
-    printf("Does not exits %d\n", identity);
     return;
   }
 
@@ -100,13 +108,30 @@ static int l_filesystem_getDirectoryItems(lua_State* state) {
 }
 
 
+static int l_filesystem_getLastModified(lua_State* state) {
+  char const* filename = l_tools_toStringOrError(state, 1);
+
+  double modtime;
+  if(filesystem_getLastModified(filename, &modtime)) {
+    lua_pushnumber(state, modtime);
+    return 1;
+  }
+  
+  lua_pushnil(state);
+  lua_pushstring(state, "file not found");
+  return 2;
+}
+
+
 static luaL_Reg const regFuncs[] = {
-  {"load",        l_filesystem_load},
-  {"read",        l_filesystem_read},
-  {"write",       l_filesystem_write},
-  {"isFile",      l_filesystem_isFile},
-  {"setIdentity", l_filesystem_setIdentity},
+  {"load",              l_filesystem_load},
+  {"read",              l_filesystem_read},
+  {"write",             l_filesystem_write},
+  {"isFile",            l_filesystem_isFile},
+  {"isDirectory",       l_filesystem_isDirectory},
+  {"setIdentity",       l_filesystem_setIdentity},
   {"getDirectoryItems", l_filesystem_getDirectoryItems},
+  {"getLastModified",   l_filesystem_getLastModified},
   {NULL, NULL}
 };
 
