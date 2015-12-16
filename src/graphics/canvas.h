@@ -8,7 +8,7 @@
 typedef struct {
   graphics_Image image;
 
-  GLuint fbo;
+//  GLuint fbo;
   GLuint stencilBuf;
   mat4x4 projectionMatrix;
 

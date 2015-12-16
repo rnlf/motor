@@ -2,9 +2,19 @@
 #include "image.h"
 
 static struct {
-  graphics_Canvas * canvas;
+  graphics_Canvas ** canvas;
+  int canvasCount;
   graphics_Canvas defaultCanvas;
+  GLuint fbo;
 } moduleData;
+
+
+static void assertCanvasCount(int count) {
+  if(count > moduleData.canvasCount) {
+    moduleData.canvases = realloc(moduleData.canvases, sizeof(graphics_Canvas*) * count);
+    moduleData.canvasCount = count;
+  }
+}
 
 void graphics_Canvas_new(graphics_Canvas *canvas, int width, int height) {
   GLuint oldTex, oldFBO;
@@ -18,10 +28,10 @@ void graphics_Canvas_new(graphics_Canvas *canvas, int width, int height) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
-  glGenFramebuffers(1, &canvas->fbo);
-  glBindFramebuffer(GL_FRAMEBUFFER, canvas->fbo);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, canvas->image.texID, 0);
-  glBindFramebuffer(GL_FRAMEBUFFER, oldFBO);
+//  glGenFramebuffers(1, &canvas->fbo);
+//  glBindFramebuffer(GL_FRAMEBUFFER, canvas->fbo);
+//  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, canvas->image.texID, 0);
+//  glBindFramebuffer(GL_FRAMEBUFFER, oldFBO);
   glBindTexture(GL_TEXTURE_2D, oldTex);
 
   m4x4_newTranslation(&canvas->projectionMatrix, -1.0f, -1.0f, 0.0f);
@@ -63,20 +73,26 @@ void graphics_Canvas_draw(graphics_Canvas const* canvas, graphics_Quad const* qu
   graphics_Image_draw(&canvas->image, quad, x, y, r, sx, sy, ox, oy, kx, ky);
 }
 
-void graphics_setCanvas(graphics_Canvas * canvas) {
+void graphics_setCanvas(graphics_Canvas ** canvas, int count) {
   if(!canvas) {
     canvas = &moduleData.defaultCanvas;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  } else {
+    glBindFramebuffer(GL_FRAMEBUFFER, moduleData.fbo);
   }
-  moduleData.canvas = canvas;
-  glBindFramebuffer(GL_FRAMEBUFFER, canvas->fbo);
+  moduleData.canvas[0] = canvas;
 
   //glViewport(0,0,canvas->image.width, canvas->image.height);
 }
 
+
 void graphics_canvas_init(int width, int height) {
+  glGenFramebuffers(1, &moduleData.fbo);
+  glBindFramebuffer(GL_FRAMEBUFFER, moduleData.fbo);
+  assertCanvasCount(1);
   m4x4_newTranslation(&moduleData.defaultCanvas.projectionMatrix, -1.0f, 1.0f, 0.0f);
   m4x4_scale(&moduleData.defaultCanvas.projectionMatrix, 2.0f / width, -2.0f / height, 0.0f);
-  moduleData.defaultCanvas.fbo = 0;
+  //moduleData.defaultCanvas.fbo = 0;
   moduleData.defaultCanvas.image.width = width;
   moduleData.defaultCanvas.image.height = height;
   moduleData.canvas = &moduleData.defaultCanvas;

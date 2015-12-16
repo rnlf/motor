@@ -59,6 +59,8 @@ static GLchar const fragmentHeader[] =
   "varying vec4 motor2d_fColor;\n"
   "uniform sampler2D " DEFAULT_SAMPLER ";\n"
   "uniform vec4 motor2d_color;\n"
+  "uniform int motor2d_canvasCount;\n"
+
   "#line 0\n";
 
 static GLchar const fragmentFooter[] =
