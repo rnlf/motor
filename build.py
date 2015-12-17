@@ -5,8 +5,8 @@ import os
 import re
 import shutil
 
-optimize = 3
-link_time_optimize = 3
+optimize = 2
+link_time_optimize = 0
 
 sources = [
   'audio/audio.c',

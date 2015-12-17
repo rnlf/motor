@@ -1,3 +1,4 @@
+#include "../math/minmax.h"
 #include <lauxlib.h>
 #include "tools.h"
 #include "graphics_canvas.h"
@@ -7,7 +8,8 @@
 static struct {
   int canvasMT;
   graphics_Canvas* currentCanvas;
-  int currentCanvasRef;
+  int canvasTableRef;
+  int canvases;
 } moduleData;
 
 l_checkTypeFn(l_graphics_isCanvas, moduleData.canvasMT)
@@ -38,39 +40,50 @@ static int l_graphics_gcCanvas(lua_State* state) {
 }
 
 static int l_graphics_setCanvas(lua_State* state) {
-  graphics_Canvas *canvas = NULL;
+  graphics_Canvas *canvas[32];
 
-  if(l_graphics_isCanvas(state, 1)) {
-    canvas = l_graphics_toCanvas(state, 1);
-  } else if(!lua_isnoneornil(state, 1)) {
-    lua_pushstring(state, "expected none or canvas");
-    return lua_error(state);
+  int top = lua_gettop(state);
+
+  int canvases = 0;
+  lua_rawgeti(state, LUA_REGISTRYINDEX, moduleData.canvasTableRef);
+  for(int i = 0; i < min(32, top); ++i) {
+    if(l_graphics_isCanvas(state, i+1)) {
+      canvas[i] = l_graphics_toCanvas(state, i+1);
+      lua_pushvalue(state, i+1);
+      ++canvases;
+      lua_rawseti(state, -2, canvases);
+    } else if(!lua_isnoneornil(state, i+1)) {
+      lua_pushstring(state, "expected none or canvas");
+      return lua_error(state);
+    }
   }
 
-  if(moduleData.currentCanvas) {
-    moduleData.currentCanvas = NULL;
-    luaL_unref(state, LUA_REGISTRYINDEX, moduleData.currentCanvasRef);
+  for(int i = canvases; i < moduleData.canvases; ++i) {
+    lua_pushnil(state);
+    lua_rawseti(state, -2, i+1);
   }
+  moduleData.canvases = canvases;
 
-  // TODO support multiple canvases
-  lua_settop(state, 1);
+  //lua_settop(state, 1);
 
-  graphics_setCanvas(canvas);
-  if(canvas) {
-    moduleData.currentCanvas = canvas;
-    moduleData.currentCanvasRef = luaL_ref(state, LUA_REGISTRYINDEX);
-  }
+  graphics_setCanvas(canvas, canvases);
 
   return 0;
 }
 
 static int l_graphics_getCanvas(lua_State* state) {
-  if(moduleData.currentCanvas) {
-    lua_rawgeti(state, LUA_REGISTRYINDEX, moduleData.currentCanvasRef);
+  if(moduleData.canvases == 0) {
+    lua_pushnil(state);
     return 1;
- }
- lua_pushnil(state);
- return 1;
+  }
+
+  lua_rawgeti(state, LUA_REGISTRYINDEX, moduleData.canvasTableRef);
+  int tab = lua_gettop(state);
+  for(int i = 0; i < moduleData.canvases; ++i) {
+    lua_rawgeti(state, tab, i+1);
+  }
+
+  return moduleData.canvases;
 }
 
 static int l_graphics_Canvas_renderTo(lua_State* state) {
@@ -79,10 +92,12 @@ static int l_graphics_Canvas_renderTo(lua_State* state) {
 
 
   graphics_Canvas *canvas = l_graphics_toCanvas(state, 1);
-  graphics_Canvas const *oldCanvas = graphics_getCanvas();
-  graphics_setCanvas(canvas);
+  // TODO actual limit
+  graphics_Canvas *oldCanvas[32];
+  int oldCount = graphics_getCanvas(oldCanvas);
+  graphics_setCanvas(&canvas, 1);
   lua_call(state, 0, 0);
-  graphics_setCanvas(oldCanvas);
+  graphics_setCanvas(oldCanvas, oldCount);
   return 0;
 }
 
@@ -192,4 +207,7 @@ static luaL_Reg const canvasFreeFuncs[] = {
 void l_graphics_canvas_register(lua_State * state) {
   moduleData.canvasMT = l_tools_makeTypeMetatable(state, canvasMetatableFuncs);
   l_tools_registerFuncsInModule(state, "graphics", canvasFreeFuncs);
+
+  lua_createtable(state, 32, 1);
+  moduleData.canvasTableRef = luaL_ref(state, LUA_REGISTRYINDEX);
 }

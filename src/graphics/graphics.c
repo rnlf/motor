@@ -157,7 +157,7 @@ void graphics_drawArray(graphics_Quad const* quad, mat4x4 const* tr2d, GLuint va
   m4x4_mulM4x4(&tr, tr2d, matrixstack_head());
 
   graphics_Shader_activate(
-    &graphics_getCanvas()->projectionMatrix,
+    &graphics_getCanvasN(0)->projectionMatrix,
     &tr,
     quad,
     useColor,
@@ -286,7 +286,7 @@ bool graphics_getScissor(int *x, int *y, int *w, int *h) {
 }
 
 void graphics_defineStencil(void) {
-  graphics_Canvas_createStencilBuffer(graphics_getCanvas());
+  graphics_Canvas_createStencilBuffer(graphics_getCanvasN(0));
   
   // Disable color writes but don't save the mask values.
   glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
@@ -321,7 +321,7 @@ void graphics_reset(void) {
   graphics_setDefaultShader();
   graphics_setColorMask(true, true, true, true);
   graphics_clearScissor();
-  graphics_setCanvas(NULL);
+  graphics_setCanvas(0, 0);
 }
 
 
