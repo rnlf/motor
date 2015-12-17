@@ -9,6 +9,9 @@ static struct {
   graphics_Shader *activeShader;
   graphics_Shader defaultShader;
   int maxTextureUnits;
+  struct slre fragmentSingleShaderDetectRegex;
+  struct slre fragmentMultiShaderDetectRegex;
+  struct slre vertexShaderDetectRegex;
 } moduleData;
 
 GLchar const *defaultVertexSource = 
@@ -350,10 +353,19 @@ graphics_Shader* graphics_getShader(void) {
   return moduleData.activeShader;
 }
 
+
+static char const * fragmentSingleShaderDetectRegexSrc = "vec4\\s*effect?\\s*\\(";
+static char const * fragmentMultiShaderDetectRegexSrc = "void\\s*effects?\\s*\\(";
+static char const * vertexShaderDetectRegexSrc = "vec4\\s*position\\s*\\(";
+
 void graphics_shader_init(void) {
   graphics_Shader_new(&moduleData.defaultShader, NULL, NULL);
   moduleData.activeShader = &moduleData.defaultShader;
   glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &moduleData.maxTextureUnits);
+
+  slre_compile(&moduleData.fragmentSingleShaderDetectRegex, fragmentSingleShaderDetectRegexSrc);
+  slre_compile(&moduleData.fragmentMultiShaderDetectRegex, fragmentMultiShaderDetectRegexSrc);
+  slre_compile(&moduleData.vertexShaderDetectRegex, vertexShaderDetectRegexSrc);
 }
 
 #define mkScalarSendFunc(name, type, glfunc) \
@@ -418,4 +430,26 @@ void graphics_Shader_sendTexture(graphics_Shader *shader, graphics_ShaderUniform
 graphics_ShaderUniformInfo const* graphics_Shader_getUniform(graphics_Shader const* shader, char const* name) {
   // Dirty trick to avoid duplicate code: Name will be treated as graphics_ShaderUniformInfo.
   return bsearch(&name, shader->uniforms, shader->uniformCount, sizeof(graphics_ShaderUniformInfo), (int(*)(void const*, void const*))compareUniformInfo);
+}
+
+
+
+bool graphics_shader_isVertexShader(char const* str) {
+  return slre_match(&moduleData.vertexShaderDetectRegex, str, strlen(str), NULL);
+}
+
+
+bool graphics_shader_isSingleFragmentShader(char const* str) {
+  return slre_match(&moduleData.fragmentSingleShaderDetectRegex, str, strlen(str), NULL);
+}
+
+
+bool graphics_shader_isMultiFragmentShader(char const* str) {
+  return slre_match(&moduleData.fragmentMultiShaderDetectRegex, str, strlen(str), NULL);
+}
+
+
+bool graphics_shader_isFragmentShader(char const* str) {
+  return graphics_shader_isSingleFragmentShader(str)
+        || graphics_shader_isMultiFragmentShader(str);
 }

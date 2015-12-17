@@ -81,3 +81,8 @@ void graphics_Shader_sendFloatVectors(graphics_Shader *shader, graphics_ShaderUn
 void graphics_Shader_sendBooleanVectors(graphics_Shader *shader, graphics_ShaderUniformInfo const* info, int count, GLint const* numbers);
 void graphics_Shader_sendFloatMatrices(graphics_Shader *shader, graphics_ShaderUniformInfo const* info, int count, float const* numbers);
 void graphics_Shader_sendTexture(graphics_Shader *shader, graphics_ShaderUniformInfo const* info, GLuint texture);
+
+bool graphics_shader_isVertexShader(char const* str);
+bool graphics_shader_isSingleFragmentShader(char const* str);
+bool graphics_shader_isMultiFragmentShader(char const* str);
+bool graphics_shader_isFragmentShader(char const* str);

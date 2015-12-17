@@ -6,7 +6,6 @@
 #include "graphics_image.h"
 #include "graphics_canvas.h"
 #include "../graphics/shader.h"
-#include "../3rdparty/slre/slre.h"
 #include "../filesystem/filesystem.h"
 #include "../math/minmax.h"
 
@@ -15,23 +14,10 @@ static void pushShaderInfoLog(lua_State *state, graphics_Shader const* shader);
 static struct {
   int shaderMT;
   int currentShaderRef;
-  struct slre fragmentSingleShaderDetectRegex;
-  struct slre vertexShaderDetectRegex;
   void * sendValueBuffer;
   int sendValueBufferSize;
 } moduleData;
 
-static char const * fragmentSingleShaderDetectRegexSrc = "vec4\\s*effects?\\s*\\(";
-static char const * vertexShaderDetectRegexSrc = "vec4\\s*position\\s*\\(";
-
-
-bool static isVertexShader(char const* str) {
-  return slre_match(&moduleData.vertexShaderDetectRegex, str, strlen(str), NULL);
-}
-
-bool static isSingleFragmentShader(char const* str) {
-  return slre_match(&moduleData.fragmentSingleShaderDetectRegex, str, strlen(str), NULL);
-}
 
 int static l_graphics_newShader(lua_State* state) {
   char const* vertexSrc = l_tools_toStringOrError(state, 1);
@@ -42,11 +28,11 @@ int static l_graphics_newShader(lua_State* state) {
   if(lua_isstring(state, 2)) {
     fragmentSrc = lua_tostring(state, 2);
     
-    if(!isVertexShader(vertexSrc)) {
+    if(!graphics_shader_isVertexShader(vertexSrc)) {
       // TODO
       int loadedFile1Size = filesystem_read(vertexSrc, -1, &loadedFile1);
       (void) loadedFile1Size;
-      if(!loadedFile1 || !isVertexShader(loadedFile1)) {
+      if(!loadedFile1 || !graphics_shader_isVertexShader(loadedFile1)) {
         free(loadedFile1);
         lua_pushstring(state, "input 1 is not a valid vertex shader");
         return lua_error(state);
@@ -54,12 +40,12 @@ int static l_graphics_newShader(lua_State* state) {
       vertexSrc = loadedFile1;
     }
 
-    if(!isSingleFragmentShader(fragmentSrc)) {
+    if(!graphics_shader_isFragmentShader(fragmentSrc)) {
       // TODO
       int loadedFile2Size = filesystem_read(fragmentSrc, -1, &loadedFile2);
       (void)loadedFile2Size;
 
-      if(!loadedFile2 || !isSingleFragmentShader(loadedFile2)) {
+      if(!loadedFile2 || !graphics_shader_isFragmentShader(loadedFile2)) {
         free(loadedFile1);
         free(loadedFile2);
         lua_pushstring(state, "input 2 is not a valid fragment shader");
@@ -69,9 +55,9 @@ int static l_graphics_newShader(lua_State* state) {
     }
 
   } else {
-    if(isVertexShader(vertexSrc)) {
+    if(graphics_shader_isVertexShader(vertexSrc)) {
       // nothing required
-    } else if(isSingleFragmentShader(vertexSrc)) {
+    } else if(graphics_shader_isFragmentShader(vertexSrc)) {
       fragmentSrc = vertexSrc;
       vertexSrc = NULL;
     } else {
@@ -83,10 +69,10 @@ int static l_graphics_newShader(lua_State* state) {
         return lua_error(state);
       }
 
-      if(isSingleFragmentShader(loadedFile1)) {
+      if(graphics_shader_isFragmentShader(loadedFile1)) {
         fragmentSrc = loadedFile1;
         vertexSrc = NULL;
-      } else if(isVertexShader(loadedFile1)) {
+      } else if(graphics_shader_isVertexShader(loadedFile1)) {
         vertexSrc = loadedFile1;
         fragmentSrc = NULL;
       } else {
@@ -388,6 +374,7 @@ static luaL_Reg const shaderMetatableFuncs[] = {
   {NULL, NULL}
 };
 
+
 static luaL_Reg const shaderFreeFuncs[] = {
   {"newShader", l_graphics_newShader},
   {"setShader", l_graphics_setShader},
@@ -395,11 +382,9 @@ static luaL_Reg const shaderFreeFuncs[] = {
   {NULL, NULL}
 };
 
+
 void l_graphics_shader_register(lua_State *state) {
   moduleData.currentShaderRef = LUA_NOREF;
   l_tools_registerFuncsInModule(state, "graphics", shaderFreeFuncs);
   moduleData.shaderMT  = l_tools_makeTypeMetatable(state, shaderMetatableFuncs);
-
-  slre_compile(&moduleData.fragmentSingleShaderDetectRegex, fragmentSingleShaderDetectRegexSrc);
-  slre_compile(&moduleData.vertexShaderDetectRegex, vertexShaderDetectRegexSrc);
 }
