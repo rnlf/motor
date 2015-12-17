@@ -21,7 +21,7 @@ static struct {
   int sendValueBufferSize;
 } moduleData;
 
-static char const * fragmentSingleShaderDetectRegexSrc = "vec4\\s*effect\\s*\\(";
+static char const * fragmentSingleShaderDetectRegexSrc = "vec4\\s*effects?\\s*\\(";
 static char const * vertexShaderDetectRegexSrc = "vec4\\s*position\\s*\\(";
 
 
