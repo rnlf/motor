@@ -24,16 +24,6 @@ static struct {
 //#endif
   SDL_Surface* surface;
 
-  /*
-  graphics_Color backgroundColor;
-  graphics_Color foregroundColor;
-
-  bool colorMask[4];
-  graphics_BlendMode blendMode;
-  int scissorBox[4];
-  bool scissorSet;
-*/
-
   graphics_DisplayState state;
 
   GLuint polygonVBO;
@@ -153,8 +143,13 @@ void graphics_swap(void) {
 void graphics_drawArray(graphics_Quad const* quad, mat4x4 const* tr2d, GLuint vao, GLuint ibo, GLuint offset, GLuint count, GLenum type, GLenum indexType, float const* useColor, float ws, float hs, bool useVertexColors) {
 
   mat4x4 tr;
-  //m4x4_mul_m4x4(&tr, matrixstack_head(), tr2d);
   m4x4_mulM4x4(&tr, tr2d, matrixstack_head());
+
+  graphics_Canvas const* canvas = graphics_getCanvasN(0);
+  float screenSize[2] = {
+    graphics_getWidth(),
+    graphics_getHeight()
+  };
 
   graphics_Shader_activate(
     &graphics_getCanvasN(0)->projectionMatrix,
@@ -163,7 +158,8 @@ void graphics_drawArray(graphics_Quad const* quad, mat4x4 const* tr2d, GLuint va
     useColor,
     ws,
     hs,
-    useVertexColors
+    useVertexColors,
+    screenSize
   );
 
   glBindVertexArray(vao);

@@ -20,6 +20,7 @@ GLchar const *defaultVertexSource =
   "}\n";
 
 static GLchar const vertexHeader[] =
+  "precision mediump float;\n"
   "uniform   mat4 motor2d_transform;\n"  
   "uniform   mat4 motor2d_projection;\n"
   "uniform   mat2 motor2d_textureRect;\n"
@@ -32,11 +33,15 @@ static GLchar const vertexHeader[] =
   "attribute vec4 motor2d_vColor;\n"
   "varying   vec2 motor2d_fUV;\n"
   "varying   vec4 motor2d_fColor;\n"
+  "varying   vec2 motor2d_screenPos;\n"
+  "uniform   vec2 love_ScreenSize;\n"
   "#line 0\n";
 
 static GLchar const vertexFooter[] =
   "void main() {\n"
-  "  gl_Position = position(motor2d_projection * motor2d_transform, vec4(motor2d_vPos * motor2d_size, 1.0, 1.0));\n"
+  "  vec4 pos = position(motor2d_projection * motor2d_transform, vec4(motor2d_vPos * motor2d_size, 1.0, 1.0));\n"
+  "  motor2d_screenPos = love_ScreenSize * ((pos.xy + vec2(1.0, 1.0)) / 2.0);\n"
+  "  gl_Position = pos;\n"
   "  motor2d_fUV = motor2d_vUV * motor2d_textureRect[1] + motor2d_textureRect[0];\n"
   "  if(motor2d_useVertexColor) {\n"
   "    motor2d_fColor = motor2d_vColor;\n"
@@ -52,7 +57,7 @@ static GLchar const *defaultFragmentSource =
 
 #define DEFAULT_SAMPLER "motor2d_tex"
 
-static GLchar const fragmentHeader[] = 
+static GLchar const singleFragmentHeader[] = 
   "precision mediump float;\n"
   "#define Image sampler2D\n"
   "#define Texel texture2D\n"
@@ -60,15 +65,38 @@ static GLchar const fragmentHeader[] =
   "#define number float\n"
   "varying vec2 motor2d_fUV;\n"
   "varying vec4 motor2d_fColor;\n"
+  "varying vec2 motor2d_screenPos;\n"
   "uniform sampler2D " DEFAULT_SAMPLER ";\n"
   "uniform vec4 motor2d_color;\n"
-  "uniform int motor2d_canvasCount;\n"
+  "uniform vec2 love_ScreenSize;\n"
 
   "#line 0\n";
 
-static GLchar const fragmentFooter[] =
+static GLchar const singleFragmentFooter[] =
   "void main() {\n"
-  "  gl_FragColor = effect(motor2d_color * motor2d_fColor, " DEFAULT_SAMPLER ", motor2d_fUV, vec2(0.0, 0.0));\n"
+  "  gl_FragColor = effect(motor2d_color * motor2d_fColor, " DEFAULT_SAMPLER ", motor2d_fUV, motor2d_screenPos);\n"
+  "}\n";
+
+static GLchar const multiFragmentHeader[] = 
+  "#extension GL_EXT_draw_buffers : require\n"
+  "precision mediump float;\n"
+  "#define Image sampler2D\n"
+  "#define Texel texture2D\n"
+  "#define extern uniform\n"
+  "#define number float\n"
+  "varying vec2 motor2d_fUV;\n"
+  "varying vec4 motor2d_fColor;\n"
+  "varying vec2 motor2d_screenPos;\n"
+  "uniform sampler2D " DEFAULT_SAMPLER ";\n"
+  "uniform vec4 motor2d_color;\n"
+  "uniform int motor2d_canvasCount;\n"
+  "#define love_Canvases gl_FragData\n"
+
+  "#line 0\n";
+
+static GLchar const multiFragmentFooter[] =
+  "void main() {\n"
+  "  effects(motor2d_color * motor2d_fColor, " DEFAULT_SAMPLER ", motor2d_fUV, motor2d_screenPos);\n"
   "}\n";
 
 bool graphics_Shader_compileAndAttachShaderRaw(graphics_Shader *program, GLenum shaderType, char const* code) {
@@ -113,11 +141,20 @@ bool graphics_Shader_compileAndAttachShader(graphics_Shader *shader, GLenum shad
     footer = vertexFooter;
     footerlen = sizeof(vertexFooter) - 1;
     break;
-  case GL_FRAGMENT_SHADER:
-    header = fragmentHeader;
-    headerlen = sizeof(fragmentHeader) - 1;
-    footer = fragmentFooter;
-    footerlen = sizeof(fragmentFooter) - 1;
+  case GL_FRAGMENT_SHADER: 
+    {
+      if(graphics_shader_isSingleFragmentShader(code)) {
+        header = singleFragmentHeader;
+        headerlen = sizeof(singleFragmentHeader) - 1;
+        footer = singleFragmentFooter;
+        footerlen = sizeof(singleFragmentFooter) - 1;
+      } else {
+        header = multiFragmentHeader;
+        headerlen = sizeof(multiFragmentHeader) - 1;
+        footer = multiFragmentFooter;
+        footerlen = sizeof(multiFragmentFooter) - 1;
+      }
+    }
     break;
   }
   int codelen = strlen(code);
@@ -207,6 +244,7 @@ static void readShaderUniforms(graphics_Shader *shader) {
   shader->uniformLocations.color       = glGetUniformLocation(shader->program, "motor2d_color");
   shader->uniformLocations.size        = glGetUniformLocation(shader->program, "motor2d_size");
   shader->uniformLocations.useVertCol  = glGetUniformLocation(shader->program, "motor2d_useVertexColor");
+  shader->uniformLocations.screenSize  = glGetUniformLocation(shader->program, "love_ScreenSize");
 
   int maxLength;
   glGetProgramiv(shader->program, GL_ACTIVE_UNIFORMS, &shader->uniformCount);
@@ -321,7 +359,7 @@ void graphics_Shader_free(graphics_Shader* shader) {
 }
 
 float const defaultColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
-void graphics_Shader_activate(mat4x4 const* projection, mat4x4 const* transform, graphics_Quad const* textureRect, float const* useColor, float ws, float hs, bool useVertexColors) {
+void graphics_Shader_activate(mat4x4 const* projection, mat4x4 const* transform, graphics_Quad const* textureRect, float const* useColor, float ws, float hs, bool useVertexColors, float const* screenSize) {
 
   glUseProgram(moduleData.activeShader->program);
 
@@ -334,6 +372,7 @@ void graphics_Shader_activate(mat4x4 const* projection, mat4x4 const* transform,
   glUniform2fv(      moduleData.activeShader->uniformLocations.size,        1,                    s);
   glUniformMatrix4fv(moduleData.activeShader->uniformLocations.transform,   1, 0, (GLfloat const*)transform);
   glUniform1i(       moduleData.activeShader->uniformLocations.useVertCol,  useVertexColors);
+  glUniform2fv(      moduleData.activeShader->uniformLocations.screenSize,  1, screenSize);
 
   for(int i = 0; i < moduleData.activeShader->textureUnitCount; ++i) {
     glActiveTexture(GL_TEXTURE0 + moduleData.activeShader->textureUnits[i].unit);

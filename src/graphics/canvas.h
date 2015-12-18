@@ -11,7 +11,6 @@ typedef struct {
 //  GLuint fbo;
   GLuint stencilBuf;
   mat4x4 projectionMatrix;
-
 } graphics_Canvas;
 
 void graphics_Canvas_new(graphics_Canvas *canvas, int width, int height);
