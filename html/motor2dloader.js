@@ -75,6 +75,11 @@
     TOTAL_MEMORY:67108864
   };
 
+  if(motor) {
+    if(motor.mem) {
+      Module.TOTAL_MEMORY = motor.mem;
+    }
+  }
 
   var enginesize, gamesize;
   var engineloaded = 0, gameloaded = 0
