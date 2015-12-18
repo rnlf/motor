@@ -40,7 +40,7 @@ static GLchar const vertexHeader[] =
 static GLchar const vertexFooter[] =
   "void main() {\n"
   "  vec4 pos = position(motor2d_projection * motor2d_transform, vec4(motor2d_vPos * motor2d_size, 1.0, 1.0));\n"
-  "  motor2d_screenPos = love_ScreenSize * ((pos.xy + vec2(1.0, 1.0)) / 2.0);\n"
+  "  motor2d_screenPos = love_ScreenSize * (vec2(pos.x + 1.0, 1.0 - pos.y) / 2.0);\n"
   "  gl_Position = pos;\n"
   "  motor2d_fUV = motor2d_vUV * motor2d_textureRect[1] + motor2d_textureRect[0];\n"
   "  if(motor2d_useVertexColor) {\n"

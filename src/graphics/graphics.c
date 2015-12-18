@@ -147,8 +147,10 @@ void graphics_drawArray(graphics_Quad const* quad, mat4x4 const* tr2d, GLuint va
 
   graphics_Canvas const* canvas = graphics_getCanvasN(0);
   float screenSize[2] = {
-    graphics_getWidth(),
-    graphics_getHeight()
+    canvas->image.width,
+    canvas->image.height
+    //graphics_getWidth(),
+    //graphics_getHeight()
   };
 
   graphics_Shader_activate(
