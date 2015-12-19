@@ -153,18 +153,15 @@ int main() {
   lua_getglobal(lua, "love");
   lua_pushstring(lua, "load");
   lua_rawget(lua, -2);
-  if(lua_pcall(lua, 0, 0, 1)) {
+  /*if(lua_pcall(lua, 0, 0, 1)) {
     printf("Error in love.load: %s\n", lua_tostring(lua, -1));
   }
+  */
+  pcall(lua, 0);
   lua_pop(lua, 1);
 
   lua_pushcfunction(lua, errorhandler);
-  /*
-  MainLoopData mainLoopData = {
-    .luaState = lua,
-    .errhand = luaL_ref(lua, LUA_REGISTRYINDEX)
-  };
-  */
+
   mainLoopData.luaState = lua;
   mainLoopData.errhand = luaL_ref(lua, LUA_REGISTRYINDEX);
 
