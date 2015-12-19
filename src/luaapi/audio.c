@@ -1,5 +1,6 @@
 #include "tools.h"
 #include "audio.h"
+#include "../math/minmax.h"
 
 // TODO use two separate metatables for streaming and static sources?
 
@@ -196,6 +197,14 @@ static int l_audio_StaticSource_clone(lua_State *state) {
 }
 
 
+static int l_audio_setVolume(lua_State *state) {
+  double gain = l_tools_toNumberOrError(state, 1);
+  gain = min(1.0, max(0.0, gain));
+  audio_setVolume(gain);
+  return 0;
+}
+
+
 
 #define t_sourceMetatableFuncs(type) \
   static luaL_Reg const type ## SourceMetatableFuncs[] = { \
@@ -226,6 +235,7 @@ t_sourceMetatableFuncs(Static)
 
 static luaL_Reg const regFuncs[] = {
   {"newSource", l_audio_newSource},
+  {"setVolume", l_audio_setVolume},
   {NULL, NULL}
 };
 

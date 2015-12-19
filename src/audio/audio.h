@@ -1,6 +1,6 @@
 #pragma once
 
-#include <AL/al.h>
 #include <stdbool.h>
+#include "listener.h"
 
 void audio_init(void);
