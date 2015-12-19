@@ -16,6 +16,13 @@ static int l_graphics_window_getHeight(lua_State* state) {
 }
 
 
+static int l_graphics_window_getDimensions(lua_State* state) {
+  lua_pushnumber(state, graphics_getWidth());
+  lua_pushnumber(state, graphics_getHeight());
+  return 2;
+}
+
+
 static int l_graphics_window_getMode(lua_State* state) {
   lua_pushnumber(state, graphics_getWidth());
   lua_pushnumber(state, graphics_getHeight());
@@ -71,9 +78,10 @@ static int l_graphics_window_getMode(lua_State* state) {
 
 
 static luaL_Reg const windowFreeFuncs[] = {
-  {"getWidth",  l_graphics_window_getWidth},
-  {"getHeight", l_graphics_window_getHeight},
-  {"getMode",   l_graphics_window_getMode},
+  {"getWidth",      l_graphics_window_getWidth},
+  {"getHeight",     l_graphics_window_getHeight},
+  {"getDimensions", l_graphics_window_getDimensions},
+  {"getMode",       l_graphics_window_getMode},
   {NULL, NULL}
 };
 
