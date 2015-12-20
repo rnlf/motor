@@ -36,6 +36,7 @@ typedef struct {
     GLuint color;
     GLuint size;
     GLuint useVertCol;
+    GLuint screenSize;
   } uniformLocations;
 
   int uniformCount;
@@ -61,7 +62,7 @@ typedef enum {
 } graphics_ShaderCompileStatus;
 
 graphics_ShaderCompileStatus graphics_Shader_new(graphics_Shader *shader, char const* vertexCode, char const* fragmentCode);
-void graphics_Shader_activate(mat4x4 const* projection, mat4x4 const* transform, graphics_Quad const* textureRect, float const* useColor, float ws,float hs, bool useVertexColors);
+void graphics_Shader_activate(mat4x4 const* projection, mat4x4 const* transform, graphics_Quad const* textureRect, float const* useColor, float ws,float hs, bool useVertexColors, float const* screenSize);
 graphics_Shader* graphics_getShader(void);
 void graphics_shader_init(void);
 void graphics_Shader_free(graphics_Shader* shader);
@@ -81,3 +82,8 @@ void graphics_Shader_sendFloatVectors(graphics_Shader *shader, graphics_ShaderUn
 void graphics_Shader_sendBooleanVectors(graphics_Shader *shader, graphics_ShaderUniformInfo const* info, int count, GLint const* numbers);
 void graphics_Shader_sendFloatMatrices(graphics_Shader *shader, graphics_ShaderUniformInfo const* info, int count, float const* numbers);
 void graphics_Shader_sendTexture(graphics_Shader *shader, graphics_ShaderUniformInfo const* info, GLuint texture);
+
+bool graphics_shader_isVertexShader(char const* str);
+bool graphics_shader_isSingleFragmentShader(char const* str);
+bool graphics_shader_isMultiFragmentShader(char const* str);
+bool graphics_shader_isFragmentShader(char const* str);

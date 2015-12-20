@@ -1,5 +1,6 @@
 #include "tools.h"
 #include "audio.h"
+#include "../math/minmax.h"
 
 // TODO use two separate metatables for streaming and static sources?
 
@@ -29,12 +30,13 @@ static int l_audio_newSource(lua_State *state) {
     type = l_tools_toEnumOrError(state, 2, l_audio_SourceType);
   }
 
+  bool success = true;
   // TODO handle load errors
   switch(type) {
   case audio_SourceType_static:
     {
       audio_StaticSource *src = lua_newuserdata(state, sizeof(audio_StaticSource));
-      audio_loadStatic(src, filename);
+      success = audio_loadStatic(src, filename);
       lua_rawgeti(state, LUA_REGISTRYINDEX, moduleData.staticMT);
       break;
     }
@@ -48,10 +50,16 @@ static int l_audio_newSource(lua_State *state) {
     }
   }
   
-
-  lua_setmetatable(state, -2);
-
-  return 1;
+  if(success) {
+    // Do not set MT if loading failed: GC must not be called
+    lua_setmetatable(state, -2);
+    return 1;
+  } else {
+    lua_pushstring(state, "Failed to open audio source ");
+    lua_pushstring(state, filename);
+    lua_concat(state, 2);
+    return lua_error(state);
+  }
 }
 
 
@@ -64,8 +72,10 @@ static int l_audio_newSource(lua_State *state) {
   }
 
 
-t_l_audio_source_generic(Static, play)
+t_l_audio_source_generic(Stream, free)
+t_l_audio_source_generic(Static, free)
 t_l_audio_source_generic(Stream, play)
+t_l_audio_source_generic(Static, play)
 t_l_audio_source_generic(Static, stop)
 t_l_audio_source_generic(Stream, stop)
 t_l_audio_source_generic(Static, rewind)
@@ -148,10 +158,28 @@ static int l_audio_SourceCommon_setVolume(lua_State *state) {
   return 0;
 }
 
+
 static int l_audio_SourceCommon_getVolume(lua_State *state) {
   l_assertType(state, 1, isSource);
   audio_SourceCommon *source = (audio_SourceCommon*)lua_touserdata(state, 1);
   lua_pushnumber(state, audio_SourceCommon_getVolume(source));
+  return 1;
+}
+
+
+static int l_audio_SourceCommon_setPitch(lua_State *state) {
+  l_assertType(state, 1, isSource);
+  float pitch = l_tools_toNumberOrError(state, 2);
+  audio_SourceCommon *source = (audio_SourceCommon*)lua_touserdata(state, 1);
+  audio_SourceCommon_setPitch(source, pitch);
+  return 0;
+}
+
+
+static int l_audio_SourceCommon_getPitch(lua_State *state) {
+  l_assertType(state, 1, isSource);
+  audio_SourceCommon *source = (audio_SourceCommon*)lua_touserdata(state, 1);
+  lua_pushnumber(state, audio_SourceCommon_getPitch(source));
   return 1;
 }
 
@@ -178,9 +206,22 @@ static int l_audio_StaticSource_clone(lua_State *state) {
 }
 
 
+static int l_audio_setVolume(lua_State *state) {
+  double gain = l_tools_toNumberOrError(state, 1);
+  gain = min(1.0, max(0.0, gain));
+  audio_setVolume(gain);
+  return 0;
+}
+
+
+l_tools_stub("Source:setPosition",             l_audio_SourceCommon_setPosition)
+l_tools_stub("Source:setRelative",             l_audio_SourceCommon_setRelative)
+l_tools_stub("Source:setAttenuationDistances", l_audio_SourceCommon_setAttenuationDistances)
+
 
 #define t_sourceMetatableFuncs(type) \
   static luaL_Reg const type ## SourceMetatableFuncs[] = { \
+    {"__gc",       l_audio_ ## type ## Source_free}, \
     {"play",       l_audio_ ## type ## Source_play}, \
     {"stop",       l_audio_ ## type ## Source_stop}, \
     {"rewind",     l_audio_ ## type ## Source_rewind}, \
@@ -195,6 +236,11 @@ static int l_audio_StaticSource_clone(lua_State *state) {
     {"setVolume",  l_audio_SourceCommon_setVolume}, \
     {"getVolume",  l_audio_SourceCommon_getVolume}, \
     {"clone",      l_audio_ ## type ## Source_clone}, \
+    {"setPitch",   l_audio_SourceCommon_setPitch}, \
+    {"getPitch",   l_audio_SourceCommon_getPitch}, \
+    {"setPosition", l_audio_SourceCommon_setPosition}, \
+    {"setRelative", l_audio_SourceCommon_setRelative}, \
+    {"setAttenuationDistances", l_audio_SourceCommon_setAttenuationDistances}, \
     {NULL, NULL} \
   };
 t_sourceMetatableFuncs(Stream)
@@ -206,6 +252,7 @@ t_sourceMetatableFuncs(Static)
 
 static luaL_Reg const regFuncs[] = {
   {"newSource", l_audio_newSource},
+  {"setVolume", l_audio_setVolume},
   {NULL, NULL}
 };
 

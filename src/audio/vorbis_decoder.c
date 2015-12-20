@@ -12,6 +12,7 @@ typedef struct {
   bool        atEnd;
 } audio_vorbis_DecoderData;
 
+
 bool audio_vorbis_openStream(char const * filename, void **decoderData) {
   int err;
   audio_vorbis_DecoderData* data = malloc(sizeof(audio_vorbis_DecoderData));
@@ -27,6 +28,13 @@ bool audio_vorbis_openStream(char const * filename, void **decoderData) {
   *decoderData = data;
 
   return true;
+}
+
+
+bool audio_vorbis_closeStream(void **decoderData) {
+  audio_vorbis_DecoderData * data = (audio_vorbis_DecoderData*)decoderData;
+  stb_vorbis_close(data->vorbis);
+  free(data->readBuffer);
 }
 
 
@@ -150,7 +158,7 @@ audio_StreamSourceDecoder audio_vorbis_decoder = {
   .getChannelCount   = audio_vorbis_getChannelCount,
   .getSampleRate     = audio_vorbis_getSampleRate,
   .openFile          = audio_vorbis_openStream,
-  .closeFile         = NULL,
+  .closeFile         = audio_vorbis_closeStream,
   .atEnd             = audio_vorbis_atEnd,
   .rewind            = audio_vorbis_rewindStream,
   .preloadSamples    = audio_vorbis_preloadStreamSamples,

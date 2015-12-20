@@ -10,6 +10,7 @@ link_time_optimize = 0
 
 sources = [
   'audio/audio.c',
+  'audio/listener.c',
   'audio/source.c',
   'audio/staticbuffer.c',
   'audio/staticsource.c',

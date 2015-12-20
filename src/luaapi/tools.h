@@ -101,3 +101,16 @@ void l_tools_pushEnum(lua_State* state, int value, l_tools_Enum const* values);
 #endif
 
 int l_tools_readNumbers(lua_State* state, int offset, float **numbers, int minNums, int components);
+
+#define l_tools_stub(name, fname)               \
+  int fname(lua_State* state) {                 \
+    (void)state;                                \
+    static bool warned = false;                 \
+    if(!warned) {                               \
+      printf("WARNING: %s is a stub.\n", name); \
+      warned = true;                            \
+    }                                           \
+    return 0;                                   \
+  }
+
+

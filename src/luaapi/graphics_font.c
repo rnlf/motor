@@ -16,6 +16,7 @@ static struct {
   graphics_Font defaultFont;
 } moduleData;
 
+
 static int l_graphics_setFont(lua_State* state) {
   l_assertType(state, 1, l_graphics_isFont);
 
@@ -33,6 +34,13 @@ static int l_graphics_setFont(lua_State* state) {
 
   return 0;
 }
+
+
+static int l_graphics_getFont(lua_State* state) {
+  lua_rawgeti(state, LUA_REGISTRYINDEX, moduleData.currentFontRef);
+  return 1;
+}
+
 
 static const l_tools_Enum l_graphics_AlignMode[] = {
   {"left", graphics_TextAlign_left},
@@ -298,6 +306,7 @@ static luaL_Reg const fontMetatableFuncs[] = {
 static luaL_Reg const fontFreeFuncs[] = {
   {"newFont",            l_graphics_newFont},
   {"setFont",            l_graphics_setFont},
+  {"getFont",            l_graphics_getFont},
   {"printf",             l_graphics_printf},
   {"print",              l_graphics_print},
   {NULL, NULL}

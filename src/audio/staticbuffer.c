@@ -9,6 +9,12 @@ audio_StaticBuffer * audio_StaticBuffer_new() {
 }
 
 
+void audio_StaticBuffer_free(audio_StaticBuffer *buffer) {
+  alDeleteBuffers(1, &buffer->buffer);
+  free(buffer);
+}
+
+
 void audio_StaticBuffer_ref(audio_StaticBuffer *buffer) {
   ++buffer->refCount;
 }

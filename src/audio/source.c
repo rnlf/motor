@@ -13,6 +13,12 @@ void audio_SourceCommon_init(audio_SourceCommon *source) {
 }
 
 
+void audio_SourceCommon_free(audio_SourceCommon *source) {
+  audio_SourceCommon_stop(source);
+  alDeleteSources(1, &source->source);
+}
+
+
 void audio_SourceCommon_play(audio_SourceCommon *source) {
   alSourcePlay(source->source);
   source->state = audio_SourceState_playing;
@@ -71,4 +77,16 @@ float audio_SourceCommon_getVolume(audio_SourceCommon const* source) {
   float gain;
   alGetSourcef(source->source, AL_GAIN, &gain);
   return gain;
+}
+
+
+float audio_SourceCommon_getPitch(audio_SourceCommon const* source) {
+  float gain;
+  alGetSourcef(source->source, AL_PITCH, &gain);
+  return gain;
+}
+
+
+void audio_SourceCommon_setPitch(audio_SourceCommon const* source, float gain) {
+  alSourcef(source->source, AL_PITCH, gain);
 }

@@ -24,16 +24,6 @@ static struct {
 //#endif
   SDL_Surface* surface;
 
-  /*
-  graphics_Color backgroundColor;
-  graphics_Color foregroundColor;
-
-  bool colorMask[4];
-  graphics_BlendMode blendMode;
-  int scissorBox[4];
-  bool scissorSet;
-*/
-
   graphics_DisplayState state;
 
   GLuint polygonVBO;
@@ -153,17 +143,25 @@ void graphics_swap(void) {
 void graphics_drawArray(graphics_Quad const* quad, mat4x4 const* tr2d, GLuint vao, GLuint ibo, GLuint offset, GLuint count, GLenum type, GLenum indexType, float const* useColor, float ws, float hs, bool useVertexColors) {
 
   mat4x4 tr;
-  //m4x4_mul_m4x4(&tr, matrixstack_head(), tr2d);
   m4x4_mulM4x4(&tr, tr2d, matrixstack_head());
 
+  graphics_Canvas const* canvas = graphics_getCanvasN(0);
+  float screenSize[2] = {
+    canvas->image.width,
+    canvas->image.height
+    //graphics_getWidth(),
+    //graphics_getHeight()
+  };
+
   graphics_Shader_activate(
-    &graphics_getCanvas()->projectionMatrix,
+    &graphics_getCanvasN(0)->projectionMatrix,
     &tr,
     quad,
     useColor,
     ws,
     hs,
-    useVertexColors
+    useVertexColors,
+    screenSize
   );
 
   glBindVertexArray(vao);
@@ -286,7 +284,7 @@ bool graphics_getScissor(int *x, int *y, int *w, int *h) {
 }
 
 void graphics_defineStencil(void) {
-  graphics_Canvas_createStencilBuffer(graphics_getCanvas());
+  graphics_Canvas_createStencilBuffer(graphics_getCanvasN(0));
   
   // Disable color writes but don't save the mask values.
   glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
@@ -321,7 +319,7 @@ void graphics_reset(void) {
   graphics_setDefaultShader();
   graphics_setColorMask(true, true, true, true);
   graphics_clearScissor();
-  graphics_setCanvas(NULL);
+  graphics_setCanvas(0, 0);
 }
 
 

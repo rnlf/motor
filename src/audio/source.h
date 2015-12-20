@@ -16,6 +16,7 @@ typedef struct {
 
 
 void audio_SourceCommon_init(audio_SourceCommon *source);
+void audio_SourceCommon_free(audio_SourceCommon *source);
 void audio_SourceCommon_play(audio_SourceCommon *source);
 void audio_SourceCommon_stop(audio_SourceCommon *source);
 void audio_SourceCommon_pause(audio_SourceCommon *source);
@@ -26,3 +27,5 @@ bool audio_SourceCommon_isStopped(audio_SourceCommon const* source);
 bool audio_SourceCommon_isPaused(audio_SourceCommon const* source);
 void audio_SourceCommon_setVolume(audio_SourceCommon const* source, float gain);
 float audio_SourceCommon_getVolume(audio_SourceCommon const* source);
+void audio_SourceCommon_setPitch(audio_SourceCommon const* source, float pitch);
+float audio_SourceCommon_getPitch(audio_SourceCommon const* source);

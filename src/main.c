@@ -6,6 +6,7 @@
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
+#include <unistd.h>
 
 #include "luaapi/audio.h"
 #include "luaapi/graphics.h"
@@ -33,6 +34,7 @@
 #include "timer/timer.h"
 #include "math/math.h"
 #include "errorhandler.h"
+#include "filesystem/filesystem.h"
 
 
 typedef struct {
@@ -45,6 +47,8 @@ typedef struct {
 void main_loop(void *data) {
   MainLoopData* loopData = (MainLoopData*)data;
   // TODO use registry to get love.update and love.draw?
+
+  chdir("love");
 
   timer_step();
   graphics_clear();
@@ -138,7 +142,12 @@ int main() {
   l_event_register(lua);
   l_joystick_register(lua);
 
+  chdir("/love");
   l_boot(lua, &config);
+
+  if(config.identity) {
+    filesystem_setIdentity(config.identity, false);
+  }
 
   image_init();
   joystick_init();
@@ -156,18 +165,15 @@ int main() {
   lua_getglobal(lua, "love");
   lua_pushstring(lua, "load");
   lua_rawget(lua, -2);
-  if(lua_pcall(lua, 0, 0, 1)) {
+  /*if(lua_pcall(lua, 0, 0, 1)) {
     printf("Error in love.load: %s\n", lua_tostring(lua, -1));
   }
+  */
+  pcall(lua, 0);
   lua_pop(lua, 1);
 
   lua_pushcfunction(lua, errorhandler);
-  /*
-  MainLoopData mainLoopData = {
-    .luaState = lua,
-    .errhand = luaL_ref(lua, LUA_REGISTRYINDEX)
-  };
-  */
+
   mainLoopData.luaState = lua;
   mainLoopData.errhand = luaL_ref(lua, LUA_REGISTRYINDEX);
 

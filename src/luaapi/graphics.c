@@ -341,6 +341,18 @@ static int l_graphics_setDefaultFilter(lua_State* state) {
 }
 
 
+static int l_graphics_isSupported(lua_State *state) {
+  static bool warned = false;
+  if(!warned) {
+    printf("WARNING: love.graphics.isSupported is a stub\n");
+    warned = true;
+  }
+  lua_pushboolean(state, true);
+  return 1;
+}
+
+
+
 static luaL_Reg const regFuncs[] = {
   {"setBackgroundColor", l_graphics_setBackgroundColor},
   {"getBackgroundColor", l_graphics_getBackgroundColor},
@@ -367,6 +379,7 @@ static luaL_Reg const regFuncs[] = {
   {"setStencil",         l_graphics_setStencil},
   {"setInvertedStencil", l_graphics_setInvertedStencil},
   {"setDefaultFilter",   l_graphics_setDefaultFilter},
+  {"isSupported",        l_graphics_isSupported},
   {NULL, NULL}
 };
 
