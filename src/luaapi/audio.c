@@ -205,6 +205,10 @@ static int l_audio_setVolume(lua_State *state) {
 }
 
 
+l_tools_stub("Source:setPosition",             l_audio_SourceCommon_setPosition)
+l_tools_stub("Source:setRelative",             l_audio_SourceCommon_setRelative)
+l_tools_stub("Source:setAttenuationDistances", l_audio_SourceCommon_setAttenuationDistances)
+
 
 #define t_sourceMetatableFuncs(type) \
   static luaL_Reg const type ## SourceMetatableFuncs[] = { \
@@ -224,6 +228,9 @@ static int l_audio_setVolume(lua_State *state) {
     {"clone",      l_audio_ ## type ## Source_clone}, \
     {"setPitch",   l_audio_SourceCommon_setPitch}, \
     {"getPitch",   l_audio_SourceCommon_getPitch}, \
+    {"setPosition", l_audio_SourceCommon_setPosition}, \
+    {"setRelative", l_audio_SourceCommon_setRelative}, \
+    {"setAttenuationDistances", l_audio_SourceCommon_setAttenuationDistances}, \
     {NULL, NULL} \
   };
 t_sourceMetatableFuncs(Stream)
