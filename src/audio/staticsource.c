@@ -34,7 +34,7 @@ bool audio_loadStatic(audio_StaticSource *source, char const * filename) {
 void audio_StaticSource_free(audio_StaticSource *source) {
   // TODO order of operations?
   alSourcei(source->common.source, AL_BUFFER, AL_NONE);
-  audio_StaticBuffer_free(source->buffer);
+  audio_StaticBuffer_unref(source->buffer);
   audio_SourceCommon_free(&source->common);
 }
 
