@@ -141,6 +141,13 @@ LDFLAGS = ''
 CC = ''
 LD = ''
 
+DRIVERS_TO_KEEP = ('tt_driver', 'sfnt_module', 'ft_smooth_renderer')
+FT_CONFIG_REPLACE = {
+    'FT_CONFIG_OPTIONS_H' : '<ftoption.h>',
+    'FT_CONFIG_STANDARD_LIBRARY_H' : '<ftstdlib.h>',
+    '/undef' : '#undef'
+}
+
 
 if SRCDIR == '.' or SRCDIR == '':
   print("Please build out-of-source")
@@ -148,9 +155,42 @@ if SRCDIR == '.' or SRCDIR == '':
 
 includeregex = re.compile('^\s*#\s*include\s*"([^"]+)"\s*$')
 
-os.system('sed -e "s/FT_CONFIG_OPTIONS_H/<ftoption.h>/" -e "s/FT_CONFIG_STANDARD_LIBRARY_H/<ftstdlib.h>/" -e "s?/undef ?#undef ?" <{srcdir}/3rdparty/freetype/builds/unix/ftconfig.in >ftconfig.h'.format(srcdir=os.path.relpath(SRCDIR)))
-os.system('mkdir -p config; sed -e \'/tt_driver\\|sfnt_module\\|ft_smooth_renderer/ !d\' < {srcdir}/3rdparty/freetype/include/config/ftmodule.h >config/ftmodule.h'.format(srcdir=os.path.relpath(SRCDIR)))
+def which(program):
+  if sys.platform == "win32" and not program.endswith(".exe"):
+    ret = which(program + ".exe")
+    if ret is not None:
+      return ret
 
+  for path in os.environ["PATH"].split(os.pathsep):
+    path = path.strip('"')
+    programPath = os.path.join(path, program)
+    if os.path.exists(programPath):
+      return programPath
+
+  return None
+
+
+def autoGenerateConfigs():
+  ftconfigInPath = '{srcdir}/3rdparty/freetype/builds/unix/ftconfig.in'.format(srcdir=os.path.relpath(SRCDIR))
+  with open(ftconfigInPath, 'rb') as ftconfigIn:
+    ftconfigData = ftconfigIn.read()
+
+  for k, v in FT_CONFIG_REPLACE.items():
+    ftconfigData = ftconfigData.replace(k, v)
+
+  with open('ftconfig.h', 'wb') as ftconfigOut:
+    ftconfigOut.write(ftconfigData)
+
+  ftmodulePath = '{srcdir}/3rdparty/freetype/include/config/ftmodule.h'.format(srcdir=os.path.relpath(SRCDIR))
+  if not os.path.exists('config'):
+    os.makedirs('config')
+
+  with open(ftmodulePath, 'rb') as ftmoduleIn:
+    with open(os.path.join('config', 'ftmodule.h'), 'wb') as ftmoduleOut:
+      for line in ftmoduleIn:
+        for driver in DRIVERS_TO_KEEP:
+          if driver in line:
+            ftmoduleOut.write(line)
 
 def newestDependency(filename, trace=[]):
   newest = os.path.getmtime(sys.argv[0])
@@ -172,7 +212,7 @@ def makeFontFile():
 
   if compiled > source:
     return False
-  
+
   with open(sourcefile, "rb") as datafile, open("vera_ttf.c", "w") as outputfile:
     content = bytearray(datafile.read())
     outputfile.write("static unsigned char const defaultFontData[] = {\n")
@@ -183,7 +223,7 @@ def makeFontFile():
         outputfile.write("\n")
 
     outputfile.write("}};\nstatic size_t defaultFontSize = {};".format(len(content)))
-  
+
   return True
 
 
@@ -248,16 +288,25 @@ def buildLoader():
   if '--native' in sys.argv:
     print("Cannot build native version of JS loader, you won't need one!")
 
-  closure = os.path.join(os.path.dirname(os.path.realpath(shutil.which("emcc"))), "third_party", "closure-compiler", "compiler.jar")
+  closure = os.path.join(os.path.dirname(os.path.realpath(which("emcc"))), "third_party", "closure-compiler", "compiler.jar")
   if not os.path.exists(closure):
-    closure = shutil.which('closure-compiler')
+    closure = which('closure-compiler')
   else:
-    java = shutil.which("java")
+    java = which("java")
     closure = "{java} -jar {closure}".format(java=java, closure=closure)
 
   htmlpath = os.path.join(os.path.dirname(sys.argv[0]), "html")
-  os.system("echo \"var logodata = 'data:image/png;base64,$(base64 -w 0 {logo})';\" >logo.js".format(logo=os.path.join(htmlpath, "motor.png")))
-  os.system("echo \"var errordata = 'data:image/png;base64,$(base64 -w 0 {logo})';\" >error.js".format(logo=os.path.join(htmlpath, "error.png")))
+
+  with open(os.path.join(htmlpath, "motor.png"), "rb") as logo:
+    logoData = logo.read().encode("base64").replace("\n","")
+  with open(os.path.join(htmlpath, "error.png"), "rb") as error:
+    errorData = error.read().encode("base64").replace("\n","")
+
+  with open("logo.js", "wb") as logoJS:
+    logoJS.write("var logodata = 'data:image/png;base64,{logoData}';\n".format(logoData=logoData))
+  with open("error.js", "wb") as errorJS:
+    errorJS.write("var errordata = 'data:image/png;base64,{errorData}';\n".format(errorData=errorData))
+
   cmd = "{closure} --language_in ECMASCRIPT5 --js=logo.js --js=error.js --js={html}/zip.js --js={html}/inflate.js --js={html}/zip-ext.js --js={html}/motor2dloader.js --js_output_file=motor2dloader.js".format(html=htmlpath, closure=closure)
 #  cmd = "cat logo.js error.js {html}/zip.js {html}/inflate.js {html}/zip-ext.js {html}/motor2dloader.js >motor2dloader.js".format(html=htmlpath)
   os.system(cmd)
@@ -289,6 +338,8 @@ def usage():
   print("    clean         delete intermediate files and final executable (doesn't clean loader)")
   print("  Flags:")
   print("    --native      build native executable (not supported for buildloader)")
+
+autoGenerateConfigs()
 
 if len(sys.argv) == 1:
   usage()
