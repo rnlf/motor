@@ -13,6 +13,12 @@ void audio_SourceCommon_init(audio_SourceCommon *source) {
 }
 
 
+void audio_SourceCommon_free(audio_SourceCommon *source) {
+  audio_SourceCommon_stop(source);
+  alDeleteSources(1, &source->source);
+}
+
+
 void audio_SourceCommon_play(audio_SourceCommon *source) {
   alSourcePlay(source->source);
   source->state = audio_SourceState_playing;

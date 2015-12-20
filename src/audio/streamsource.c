@@ -24,7 +24,22 @@ static void initialPreload(audio_StreamSource *source) {
 }
 
 
+void audio_StreamSource_free(audio_StreamSource *source) {
+  // TODO order of operations?
+  audio_StreamSource_stop(source);
+
+  free(source->filename);
+  alDeleteBuffers(2, source->buffers);
+  audio_SourceCommon_free(&source->common);
+  source->decoder->closeFile(source->decoderData);
+  
+}
+
+
 bool audio_loadStream(audio_StreamSource *source, char const * filename) {
+  while(filename[0] == '/') {
+    ++filename;
+  }
   // TODO select approprate decoder (there only one right now though!)
   source->decoder = streamDecoders[0];
 

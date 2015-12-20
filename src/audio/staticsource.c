@@ -7,16 +7,35 @@ static audio_StaticSourceDecoder const *staticDecoders[] = {
   &audio_vorbis_static_decoder
 };
 
-void audio_loadStatic(audio_StaticSource *source, char const * filename) {
+bool audio_loadStatic(audio_StaticSource *source, char const * filename) {
+  while(filename[0] == '/') {
+    ++filename;
+  }
+
   audio_SourceCommon_init(&source->common);
 
 //  alGenBuffers(1, &source->buffer);
   source->buffer = audio_StaticBuffer_new();
 
   // TODO detect file type
-  staticDecoders[0]->loadFile(source->buffer->buffer, filename);
+  bool loaded = staticDecoders[0]->loadFile(source->buffer->buffer, filename);
+
+  if(!loaded) {
+    audio_StaticBuffer_free(source->buffer);
+    audio_SourceCommon_free(&source->common);
+    return false;
+  }
 
   alSourcei(source->common.source, AL_BUFFER, source->buffer->buffer);
+  return true;
+}
+
+
+void audio_StaticSource_free(audio_StaticSource *source) {
+  // TODO order of operations?
+  alSourcei(source->common.source, AL_BUFFER, AL_NONE);
+  audio_StaticBuffer_free(source->buffer);
+  audio_SourceCommon_free(&source->common);
 }
 
 

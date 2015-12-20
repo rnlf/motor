@@ -30,12 +30,13 @@ static int l_audio_newSource(lua_State *state) {
     type = l_tools_toEnumOrError(state, 2, l_audio_SourceType);
   }
 
+  bool success = true;
   // TODO handle load errors
   switch(type) {
   case audio_SourceType_static:
     {
       audio_StaticSource *src = lua_newuserdata(state, sizeof(audio_StaticSource));
-      audio_loadStatic(src, filename);
+      success = audio_loadStatic(src, filename);
       lua_rawgeti(state, LUA_REGISTRYINDEX, moduleData.staticMT);
       break;
     }
@@ -49,10 +50,16 @@ static int l_audio_newSource(lua_State *state) {
     }
   }
   
-
-  lua_setmetatable(state, -2);
-
-  return 1;
+  if(success) {
+    // Do not set MT if loading failed: GC must not be called
+    lua_setmetatable(state, -2);
+    return 1;
+  } else {
+    lua_pushstring(state, "Failed to open audio source ");
+    lua_pushstring(state, filename);
+    lua_concat(state, 2);
+    return lua_error(state);
+  }
 }
 
 
@@ -65,8 +72,10 @@ static int l_audio_newSource(lua_State *state) {
   }
 
 
-t_l_audio_source_generic(Static, play)
+t_l_audio_source_generic(Stream, free)
+t_l_audio_source_generic(Static, free)
 t_l_audio_source_generic(Stream, play)
+t_l_audio_source_generic(Static, play)
 t_l_audio_source_generic(Static, stop)
 t_l_audio_source_generic(Stream, stop)
 t_l_audio_source_generic(Static, rewind)
@@ -212,6 +221,7 @@ l_tools_stub("Source:setAttenuationDistances", l_audio_SourceCommon_setAttenuati
 
 #define t_sourceMetatableFuncs(type) \
   static luaL_Reg const type ## SourceMetatableFuncs[] = { \
+    {"__gc",       l_audio_ ## type ## Source_free}, \
     {"play",       l_audio_ ## type ## Source_play}, \
     {"stop",       l_audio_ ## type ## Source_stop}, \
     {"rewind",     l_audio_ ## type ## Source_rewind}, \

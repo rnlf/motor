@@ -16,6 +16,7 @@ typedef struct {
 
 
 void audio_SourceCommon_init(audio_SourceCommon *source);
+void audio_SourceCommon_free(audio_SourceCommon *source);
 void audio_SourceCommon_play(audio_SourceCommon *source);
 void audio_SourceCommon_stop(audio_SourceCommon *source);
 void audio_SourceCommon_pause(audio_SourceCommon *source);
