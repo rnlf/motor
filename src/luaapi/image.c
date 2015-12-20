@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <lauxlib.h>
 #include "image.h"
 #include "tools.h"
@@ -13,7 +12,14 @@ int l_image_newImageData(lua_State* state) {
   image_ImageData* imageData = (image_ImageData*)lua_newuserdata(state, sizeof(image_ImageData));
   int s1type = lua_type(state, 1);
   if(s1type == LUA_TSTRING) {
-    image_ImageData_new_with_filename(imageData, lua_tostring(state, 1));
+    if(!image_ImageData_new_with_filename(imageData, lua_tostring(state, 1))) {
+      lua_pushstring(state, "Could not load image file ");
+      lua_pushstring(state, lua_tostring(state, 1));
+      lua_pushstring(state, ": ");
+      lua_pushstring(state, image_lastError());
+      lua_concat(state, 4);
+      return lua_error(state);
+    }
   } else if(s1type == LUA_TNUMBER && lua_type(state, 2) == LUA_TNUMBER) {
     image_ImageData_new_with_size(imageData, lua_tointeger(state, 1), lua_tointeger(state, 2));
   } else {
@@ -50,15 +56,14 @@ static int l_graphics_Image_mapPixel(lua_State* state) {
   image_ImageData *data = l_image_toImageData(state, 1);
 
 
-  int x = luaL_optnumber(state, 3, 0);
-  int y = luaL_optnumber(state, 4, 0);
-  int width  = luaL_optnumber(state, 5, data->w - x);
-  int height = luaL_optnumber(state, 6, data->h - y);
+  int x = luaL_optinteger(state, 3, 0);
+  int y = luaL_optinteger(state, 4, 0);
+  int width  = luaL_optinteger(state, 5, data->w - x);
+  int height = luaL_optinteger(state, 6, data->h - y);
 
-  for(int r = y; r <= y + height; ++r) {
-    for(int c = x; c <= x + width; ++c) {
+  for(int r = y; r < y + height; ++r) {
+    for(int c = x; c < x + width; ++c) {
       uint8_t *pixel = data->surface + (r * data->w + c) * 4;
-      printf("TOP: %d\n", lua_gettop(state));
       lua_pushvalue(state, 2);
       lua_pushnumber(state, c);
       lua_pushnumber(state, r);
