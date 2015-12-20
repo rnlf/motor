@@ -89,7 +89,7 @@ static int l_graphics_draw(lua_State* state) {
   l_graphics_Batch          const * batch  = NULL;
   graphics_Canvas           const * canvas = NULL;
   l_graphics_Mesh           const * mesh   = NULL;
-  l_graphics_ParticleSystem const * ps     = NULL;
+  l_graphics_ParticleSystem       * ps     = NULL;
 
   graphics_Quad const * quad = &defaultQuad;
   int baseidx = 2;

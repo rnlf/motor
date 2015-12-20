@@ -35,6 +35,7 @@ bool audio_vorbis_closeStream(void **decoderData) {
   audio_vorbis_DecoderData * data = (audio_vorbis_DecoderData*)decoderData;
   stb_vorbis_close(data->vorbis);
   free(data->readBuffer);
+  return true;
 }
 
 

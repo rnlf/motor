@@ -18,12 +18,12 @@ static const graphics_Quad defaultQuad = {
 };
 
 int l_graphics_newSpriteBatch(lua_State* state) {
-  l_graphics_Image const* image = l_graphics_toTextureOrError(state, 1);
+  graphics_Image const* image = l_graphics_toTextureOrError(state, 1);
 
   int count = luaL_optnumber(state, 2, 128);
 
   l_graphics_Batch* batch = lua_newuserdata(state, sizeof(l_graphics_Batch));
-  graphics_Batch_new(&batch->batch, &image->image, count, graphics_BatchUsage_static);
+  graphics_Batch_new(&batch->batch, image, count, graphics_BatchUsage_static);
 
   lua_pushvalue(state, 1);
   batch->textureRef = luaL_ref(state, LUA_REGISTRYINDEX);

@@ -165,7 +165,7 @@ void graphics_ParticleSystem_moveTo(graphics_ParticleSystem *ps, float x, float 
 
 void graphics_ParticleSystem_clone(graphics_ParticleSystem const* ps, graphics_ParticleSystem *psNew);
 
-void graphics_ParticleSystem_draw(graphics_ParticleSystem const* ps, float x, float y, float r, float sx, float sy, float ox, float oy, float kx, float ky);
+void graphics_ParticleSystem_draw(graphics_ParticleSystem * ps, float x, float y, float r, float sx, float sy, float ox, float oy, float kx, float ky);
 void graphics_ParticleSystem_setLinearAcceleration(graphics_ParticleSystem *ps, float xmin, float ymin, float xmax, float ymax);
 void graphics_ParticleSystem_getLinearAcceleration(graphics_ParticleSystem const *ps, float *xmin, float *ymin, float *xmax, float *ymax);
 
