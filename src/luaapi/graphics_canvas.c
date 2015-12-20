@@ -86,6 +86,7 @@ static int l_graphics_getCanvas(lua_State* state) {
   return moduleData.canvases;
 }
 
+
 static int l_graphics_Canvas_renderTo(lua_State* state) {
   l_assertType(state, 1, l_graphics_isCanvas);
   l_assertType(state, 2, lua_isfunction);
