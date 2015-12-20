@@ -102,6 +102,53 @@ static int l_graphics_Canvas_renderTo(lua_State* state) {
   return 0;
 }
 
+
+static int l_graphics_Canvas_clear(lua_State* state) {
+  l_assertType(state, 1, l_graphics_isCanvas);
+
+  int top = lua_gettop(state);
+  int r = 0;
+  int g = 0;
+  int b = 0;
+  int a = 0;
+  if(top > 1) {
+    if(lua_istable(state, 2)) {
+      lua_rawgeti(state, 2, 1);
+      lua_rawgeti(state, 2, 2);
+      lua_rawgeti(state, 2, 3);
+      lua_rawgeti(state, 2, 4);
+      r = l_tools_toNumberOrError(state, -4);
+      g = l_tools_toNumberOrError(state, -3);
+      b = l_tools_toNumberOrError(state, -2);
+      a = luaL_optnumber(state, -1, 255);
+    } else {
+      r = l_tools_toNumberOrError(state, 2);
+      g = l_tools_toNumberOrError(state, 3);
+      b = l_tools_toNumberOrError(state, 4);
+      a = luaL_optnumber(state, 5, 255);
+    }
+  }
+
+
+  graphics_Canvas *canvas = l_graphics_toCanvas(state, 1);
+  // TODO actual limit
+  graphics_Canvas *oldCanvas[32];
+  int oldCount = graphics_getCanvas(oldCanvas);
+  graphics_setCanvas(&canvas, 1);
+
+  float oldBackground[4];
+  memcpy(oldBackground, graphics_getBackgroundColor(), sizeof(oldBackground));
+
+  graphics_setBackgroundColor(r / 255.0, g / 255.0, b / 255.0, a / 255.0);
+  graphics_clear();
+
+  graphics_setBackgroundColor(oldBackground[0], oldBackground[1], oldBackground[2], oldBackground[3]);
+
+  graphics_setCanvas(oldCanvas, oldCount);
+  return 0;
+}
+
+
 static int l_graphics_Canvas_getDimensions(lua_State* state) {
   l_assertType(state, 1, l_graphics_isCanvas);
 
@@ -194,6 +241,7 @@ static luaL_Reg const canvasMetatableFuncs[] = {
   {"getFilter",          l_graphics_Canvas_getFilter},
   {"setWrap",            l_graphics_Canvas_setWrap},
   {"getWrap",            l_graphics_Canvas_getWrap},
+  {"clear",              l_graphics_Canvas_clear},
   //{"getData",            l_graphics_Image_getData},
   {NULL, NULL}
 };
