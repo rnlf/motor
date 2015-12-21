@@ -19,7 +19,7 @@ static audio_StreamSourceDecoder const* streamDecoders[] = {
 
 
 static void initialPreload(audio_StreamSource *source) {
-  for(int i = 0; i < 2; ++i) {
+  for(int i = 0; i < preloadBufferCount; ++i) {
     source->decoder->preloadSamples(source->decoderData, 44100);
     source->decoder->uploadPreloadedSamples(source->decoderData, source->buffers[i]);
   }
@@ -31,7 +31,7 @@ void audio_StreamSource_free(audio_StreamSource *source) {
   audio_StreamSource_stop(source);
 
   free(source->filename);
-  alDeleteBuffers(2, source->buffers);
+  alDeleteBuffers(preloadBufferCount, source->buffers);
   audio_SourceCommon_free(&source->common);
   source->decoder->closeFile(source->decoderData);
   
@@ -54,7 +54,7 @@ bool audio_loadStream(audio_StreamSource *source, char const * filename) {
 
   audio_SourceCommon_init(&source->common);
 
-  alGenBuffers(2, source->buffers);
+  alGenBuffers(preloadBufferCount, source->buffers);
 
   initialPreload(source);
 
@@ -75,7 +75,7 @@ static void prepareToPlay(audio_StreamSource *source) {
     return;
   }
 
-  alSourceQueueBuffers(source->common.source, 2, source->buffers);
+  alSourceQueueBuffers(source->common.source, preloadBufferCount, source->buffers);
 
   if(moduleData.playingStreamCount == moduleData.playingStreamSize) {
     moduleData.playingStreamSize = 2 * moduleData.playingStreamSize;
@@ -138,6 +138,10 @@ void audio_updateStreams(void) {
     if(state == AL_STOPPED && queued == 0) {
       --moduleData.playingStreamCount;
       moduleData.playingStreams[i] = moduleData.playingStreams[moduleData.playingStreamCount];
+    } else if(state == AL_STOPPED && queued > 0) {
+      // Should only happen when we seriously ran out of time,
+      // but there documented cases where it happened during load time
+      alSourcePlay(src);
     } else {
       ++i;
     }
