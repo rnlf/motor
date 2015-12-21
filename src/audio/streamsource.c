@@ -140,7 +140,7 @@ void audio_updateStreams(void) {
       moduleData.playingStreams[i] = moduleData.playingStreams[moduleData.playingStreamCount];
     } else if(state == AL_STOPPED && queued > 0) {
       // Should only happen when we seriously ran out of time,
-      // but there documented cases where it happened during load time
+      // but there are documented cases where it happened during load time.
       alSourcePlay(src);
     } else {
       ++i;
