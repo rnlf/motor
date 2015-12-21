@@ -167,3 +167,8 @@ bool filesystem_getLastModified(char const* filename, double *out) {
 
   return true;
 }
+
+
+FILE* filesystem_fopen(char const* filename, char const* mode) {
+  return fopen(filename, mode);
+}

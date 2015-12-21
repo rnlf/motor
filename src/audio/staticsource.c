@@ -1,3 +1,4 @@
+#include "../filesystem/filesystem.h"
 #include "staticsource.h"
 #include "decoder.h"
 
@@ -12,13 +13,15 @@ bool audio_loadStatic(audio_StaticSource *source, char const * filename) {
     ++filename;
   }
 
+  FILE* infile = filesystem_fopen(filename, "rb");
+
   audio_SourceCommon_init(&source->common);
 
 //  alGenBuffers(1, &source->buffer);
   source->buffer = audio_StaticBuffer_new();
 
   // TODO detect file type
-  bool loaded = staticDecoders[0]->loadFile(source->buffer->buffer, filename);
+  bool loaded = staticDecoders[0]->loadFile(source->buffer->buffer, infile);
 
   if(!loaded) {
     audio_StaticBuffer_free(source->buffer);

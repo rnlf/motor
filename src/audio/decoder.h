@@ -1,11 +1,12 @@
 #pragma once
 
+#include <stdio.h>
 #include <stdbool.h>
 #include <AL/al.h>
 
 typedef struct {
   bool (*testFile)(char const *filename);
-  bool (*loadFile)(ALuint buffer, char const* filename);
+  bool (*loadFile)(ALuint buffer, FILE* file);
 } audio_StaticSourceDecoder;
 
 /*
@@ -16,7 +17,7 @@ typedef struct {
 
 typedef struct {
   bool (*testFile)(char const *filename);
-  bool (*openFile)(char const *filename, void **decoderData);
+  bool (*openFile)(FILE* file, void **decoderData);
   int  (*getChannelCount)(void *decoderData);
   int  (*getSampleRate)(void *decoderData);
   bool (*closeFile)(void **decoderData);

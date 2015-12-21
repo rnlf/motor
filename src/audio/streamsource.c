@@ -1,3 +1,4 @@
+#include "../filesystem/filesystem.h"
 #include <string.h>
 #include <stdlib.h>
 #include "streamsource.h"
@@ -8,6 +9,7 @@ static struct {
   int playingStreamSize;
   int playingStreamCount;
 } moduleData;
+
 
 extern audio_StreamSourceDecoder audio_vorbis_decoder;
 
@@ -42,8 +44,10 @@ bool audio_loadStream(audio_StreamSource *source, char const * filename) {
   }
   // TODO select approprate decoder (there only one right now though!)
   source->decoder = streamDecoders[0];
+  
+  FILE* infile = filesystem_fopen(filename, "rb");
 
-  bool good = source->decoder->openFile(filename, &source->decoderData);
+  bool good = source->decoder->openFile(infile, &source->decoderData);
   if(!good) {
     return false;
   }
