@@ -44,7 +44,7 @@ static bool statFile(char const* dir, char const* filename, struct stat *out) {
 }
 
 
-static bool findFileRW(char const* filename, struct stat *out) {
+static bool findExistingFileRW(char const* filename, struct stat *out) {
   if(moduleData.identityFirst) {
     if(statFile(moduleData.identityPath, filename, out)) {
       return true;
@@ -76,7 +76,7 @@ void filesystem_setIdentity(char const* name, bool first) {
 
 int filesystem_read(char const* filename, int max, char** output) {
   struct stat status;
-  if(!findFileRW(filename, &status)) {
+  if(!findExistingFileRW(filename, &status)) {
     return -1;
   }
 
@@ -145,21 +145,21 @@ DIR* filesystem_openDir(char const* dirname, bool identity) {
 
 bool filesystem_isFile(char const* filename) {
   struct stat status;
-  bool exist = findFileRW(filename, &status);
+  bool exist = findExistingFileRW(filename, &status);
   return exist && S_ISREG(status.st_mode);
 }
 
 
 bool filesystem_isDirectory(char const* filename) {
   struct stat status;
-  bool exist = findFileRW(filename, &status);
+  bool exist = findExistingFileRW(filename, &status);
   return exist && S_ISDIR(status.st_mode);
 }
 
 
 bool filesystem_getLastModified(char const* filename, double *out) {
   struct stat status;
-  if(!findFileRW(filename, &status)) {
+  if(!findExistingFileRW(filename, &status)) {
     return false;
   }
 
@@ -169,9 +169,18 @@ bool filesystem_getLastModified(char const* filename, double *out) {
 }
 
 
-FILE* filesystem_fopen(char const* filename, char const* mode) {
-  while(filename[0] == '/') {
-    ++filename;
+char const* filesystem_locateWritableFile(char const* filename) {
+  buildFilename(moduleData.identityPath, filename);
+  return moduleData.nameBuffer;
+}
+
+
+char const* filesystem_locateReadableFile(char const* filename) {
+  struct stat unused;
+  // also builds moduleData.nameBuffer
+  if(!findExistingFileRW(filename, &unused)) {
+    return 0;
   }
-  return fopen(filename, mode);
+
+  return moduleData.nameBuffer;
 }

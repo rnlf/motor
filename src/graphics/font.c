@@ -10,6 +10,7 @@
 #include "shader.h"
 #include "batch.h"
 #include "vera_ttf.c"
+#include "../filesystem/filesystem.h"
 
 #include FT_GLYPH_H
 
@@ -167,7 +168,8 @@ int graphics_Font_new(graphics_Font *dst, char const* filename, int ptsize) {
   // TODO use error
   int error;
   if(filename) {
-    FT_New_Face(moduleData.ft, filename, 0, &dst->face);
+    char const* realFilename = filesystem_locateReadableFile(filename);
+    FT_New_Face(moduleData.ft, realFilename, 0, &dst->face);
   } else {
     FT_New_Memory_Face(moduleData.ft, defaultFontData, defaultFontSize, 0, &dst->face);
   }

@@ -13,10 +13,10 @@ typedef struct {
 } audio_vorbis_DecoderData;
 
 
-bool audio_vorbis_openStream(FILE* file, void **decoderData) {
+bool audio_vorbis_openStream(char const* filename, void **decoderData) {
   int err;
   audio_vorbis_DecoderData* data = malloc(sizeof(audio_vorbis_DecoderData));
-  data->vorbis = stb_vorbis_open_file(file, 1, &err, NULL);
+  data->vorbis = stb_vorbis_open_filename(filename, &err, NULL);
 
   stb_vorbis_info info = stb_vorbis_get_info(data->vorbis);
 
@@ -102,60 +102,18 @@ int audio_vorbis_uploadPreloadedStreamSamples(void *decoderData, ALuint buffer) 
     data->preloadedSamples * sizeof(ALshort),
     info.sample_rate
   );
-  //printf("uploaded %d samples to buffer %d\n", data->preloadedSamples, buffer);
 
   int uploaded = data->preloadedSamples;
   data->preloadedSamples = 0;
   return uploaded;
 }
 
-// Why doesn't stb_vorbis have this?
-static int vorbis_decode_file(FILE* file, int *channels, int *sample_rate, short **output)
-{
-   int data_len, offset, total, limit, error;
-   short *data;
-   stb_vorbis *v = stb_vorbis_open_file(file, 1, &error, NULL);
-   if (v == NULL) return -1;
-   limit = v->channels * 4096;
-   *channels = v->channels;
-   if (sample_rate)
-      *sample_rate = v->sample_rate;
-   offset = data_len = 0; 
-   total = limit;
-   data = (short *) malloc(total * sizeof(*data));
-   if (data == NULL) {
-      stb_vorbis_close(v);
-      return -2;
-   }
-   for (;;) {
-      int n = stb_vorbis_get_frame_short_interleaved(v, v->channels, data+offset, total-offset);
-      if (n == 0) break;
-      data_len += n;
-      offset += n * v->channels;
-      if (offset + limit > total) {
-         short *data2;
-         total *= 2;
-         data2 = (short *) realloc(data, total * sizeof(*data));
-         if (data2 == NULL) {
-            free(data);
-            stb_vorbis_close(v);
-            return -2;
-         }    
-         data = data2;
-      }    
-   }
-   *output = data;
-   stb_vorbis_close(v);
-   return data_len;
-}
 
-
-
-bool audio_vorbis_load(ALuint buffer, FILE* file) {
+bool audio_vorbis_load(ALuint buffer, char const* filename) {
   short *data;
   int channels;
   int samplingrate;
-  int len = vorbis_decode_file(file, &channels, &samplingrate, &data);
+  int len = stb_vorbis_decode_filename(filename, &channels, &samplingrate, &data);
 
   if(len == -1) {
     return false;

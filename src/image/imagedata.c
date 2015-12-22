@@ -3,6 +3,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../3rdparty/stb/stb_image.c"
 #include "imagedata.h"
+#include "../filesystem/filesystem.h"
 
 
 char const* image_lastError(void) {
@@ -11,14 +12,15 @@ char const* image_lastError(void) {
 
 bool image_ImageData_new_with_filename(image_ImageData *dst, char const* filename) {
   int n;
-  while(filename[0] == '/') {
-    ++filename;
+
+  char *file = filesystem_locateReadableFile(filename);
+  if(file == 0) {
+    return false;
   }
-  dst->surface = stbi_load(filename, &dst->w, &dst->h, &n, 4);
+  dst->surface = stbi_load(file, &dst->w, &dst->h, &n, 4);
   if(dst->surface == 0) {
     return false;
   }
-  printf("Loaded: %s, %d, %d\n", filename, dst->w, dst->h);
   return true;
 }
 

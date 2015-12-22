@@ -6,7 +6,7 @@
 
 typedef struct {
   bool (*testFile)(char const *filename);
-  bool (*loadFile)(ALuint buffer, FILE* file);
+  bool (*loadFile)(ALuint buffer, char const* file);
 } audio_StaticSourceDecoder;
 
 /*
@@ -17,7 +17,7 @@ typedef struct {
 
 typedef struct {
   bool (*testFile)(char const *filename);
-  bool (*openFile)(FILE* file, void **decoderData);
+  bool (*openFile)(char const* filename, void **decoderData);
   int  (*getChannelCount)(void *decoderData);
   int  (*getSampleRate)(void *decoderData);
   bool (*closeFile)(void **decoderData);

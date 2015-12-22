@@ -13,7 +13,7 @@ bool audio_loadStatic(audio_StaticSource *source, char const * filename) {
     ++filename;
   }
 
-  FILE* infile = filesystem_fopen(filename, "rb");
+  char const* infile = filesystem_locateReadableFile(filename);
 
   audio_SourceCommon_init(&source->common);
 

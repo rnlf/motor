@@ -43,7 +43,7 @@ bool audio_loadStream(audio_StreamSource *source, char const * filename) {
   // TODO select approprate decoder (there is only one right now though!)
   source->decoder = streamDecoders[0];
   
-  FILE* infile = filesystem_fopen(filename, "rb");
+  char const* infile = filesystem_locateReadableFile(filename);
 
   bool good = source->decoder->openFile(infile, &source->decoderData);
   if(!good) {
