@@ -17,10 +17,9 @@ bool audio_loadStatic(audio_StaticSource *source, char const * filename) {
 
   audio_SourceCommon_init(&source->common);
 
-//  alGenBuffers(1, &source->buffer);
   source->buffer = audio_StaticBuffer_new();
 
-  // TODO detect file type
+  // decoder shall close the file
   bool loaded = staticDecoders[0]->loadFile(source->buffer->buffer, infile);
 
   if(!loaded) {
@@ -35,7 +34,7 @@ bool audio_loadStatic(audio_StaticSource *source, char const * filename) {
 
 
 void audio_StaticSource_free(audio_StaticSource *source) {
-  // TODO order of operations?
+  audio_SourceCommon_stop(&source->common);
   alSourcei(source->common.source, AL_BUFFER, AL_NONE);
   audio_StaticBuffer_unref(source->buffer);
   audio_SourceCommon_free(&source->common);

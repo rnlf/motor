@@ -170,5 +170,8 @@ bool filesystem_getLastModified(char const* filename, double *out) {
 
 
 FILE* filesystem_fopen(char const* filename, char const* mode) {
+  while(filename[0] == '/') {
+    ++filename;
+  }
   return fopen(filename, mode);
 }

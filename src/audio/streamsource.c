@@ -17,6 +17,8 @@ static audio_StreamSourceDecoder const* streamDecoders[] = {
   &audio_vorbis_decoder
 };
 
+static void audio_StreamSource_stop1(audio_StreamSource *source);
+
 
 static void initialPreload(audio_StreamSource *source) {
   for(int i = 0; i < preloadBufferCount; ++i) {
@@ -27,22 +29,18 @@ static void initialPreload(audio_StreamSource *source) {
 
 
 void audio_StreamSource_free(audio_StreamSource *source) {
-  // TODO order of operations?
-  audio_StreamSource_stop(source);
+  // Stop without rewind
+  audio_StreamSource_stop1(source);
 
   free(source->filename);
   alDeleteBuffers(preloadBufferCount, source->buffers);
   audio_SourceCommon_free(&source->common);
   source->decoder->closeFile(source->decoderData);
-  
 }
 
 
 bool audio_loadStream(audio_StreamSource *source, char const * filename) {
-  while(filename[0] == '/') {
-    ++filename;
-  }
-  // TODO select approprate decoder (there only one right now though!)
+  // TODO select approprate decoder (there is only one right now though!)
   source->decoder = streamDecoders[0];
   
   FILE* infile = filesystem_fopen(filename, "rb");
@@ -60,6 +58,7 @@ bool audio_loadStream(audio_StreamSource *source, char const * filename) {
 
   source->looping = false;
 
+  // Make copy of filename (allows simple free on the filename when closing a stream)
   source->filename = malloc(sizeof(char) * (strlen(filename) + 1));
   strcpy(source->filename, filename);
 
@@ -166,11 +165,8 @@ void audio_streamsource_init(void) {
 }
 
 
-void audio_StreamSource_stop(audio_StreamSource *source) {
-  if(source->common.state == audio_SourceState_stopped) {
-    return;
-  }
-
+static void audio_StreamSource_stop1(audio_StreamSource *source) {
+  // Remove from list of active streams
   for(int i = 0; i < moduleData.playingStreamCount; ++i) {
     if(moduleData.playingStreams[i] == source) {
       --moduleData.playingStreamCount;
@@ -187,6 +183,15 @@ void audio_StreamSource_stop(audio_StreamSource *source) {
     ALuint buf;
     alSourceUnqueueBuffers(source->common.source, 1, &buf);
   }
+}
+
+
+void audio_StreamSource_stop(audio_StreamSource *source) {
+  if(source->common.state == audio_SourceState_stopped) {
+    return;
+  }
+
+  audio_StreamSource_stop1(source);
 
   source->decoder->rewind(source->decoderData);
   source->decoder->flush(source->decoderData);
