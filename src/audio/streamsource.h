@@ -6,11 +6,13 @@
 #include "source.h"
 #include "decoder.h"
 
+static const int preloadBufferCount = 4;
+
 typedef struct {
   audio_SourceCommon common;
   audio_StreamSourceDecoder const* decoder;
   void*  decoderData;
-  ALuint buffers[2];
+  ALuint buffers[preloadBufferCount];
   bool   looping;
   char  *filename;
 } audio_StreamSource;

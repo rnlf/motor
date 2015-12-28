@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 #include <dirent.h>
+#include <stdio.h>
 
 void filesystem_init(void);
 
@@ -13,3 +14,5 @@ bool filesystem_isDirectory(char const* filename);
 void filesystem_setIdentity(char const* name, bool first);
 DIR* filesystem_openDir(char const* dirname, bool identity);
 bool filesystem_getLastModified(char const* filename, double *out);
+char const* filesystem_locateReadableFile(char const* filename);
+char const* filesystem_locateWritableFile(char const* filename);

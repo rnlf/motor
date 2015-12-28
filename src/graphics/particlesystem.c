@@ -715,7 +715,7 @@ void graphics_ParticleSystem_update(graphics_ParticleSystem *ps, float dt) {
   memcpy(ps->prevPosition, ps->position, sizeof(ps->position));
 }
 
-void graphics_ParticleSystem_draw(graphics_ParticleSystem const* ps, float x, float y, float r, float sx, float sy, float ox, float oy, float kx, float ky) {
+void graphics_ParticleSystem_draw(graphics_ParticleSystem *ps, float x, float y, float r, float sx, float sy, float ox, float oy, float kx, float ky) {
   //printf("Drawing particle system, %d particles\n", ps->activeParticles);
 
   graphics_Batch *b = &ps->batch;

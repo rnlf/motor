@@ -13,7 +13,7 @@ typedef struct {
 } audio_vorbis_DecoderData;
 
 
-bool audio_vorbis_openStream(char const * filename, void **decoderData) {
+bool audio_vorbis_openStream(char const* filename, void **decoderData) {
   int err;
   audio_vorbis_DecoderData* data = malloc(sizeof(audio_vorbis_DecoderData));
   data->vorbis = stb_vorbis_open_filename(filename, &err, NULL);
@@ -35,6 +35,7 @@ bool audio_vorbis_closeStream(void **decoderData) {
   audio_vorbis_DecoderData * data = (audio_vorbis_DecoderData*)decoderData;
   stb_vorbis_close(data->vorbis);
   free(data->readBuffer);
+  return true;
 }
 
 
@@ -101,7 +102,6 @@ int audio_vorbis_uploadPreloadedStreamSamples(void *decoderData, ALuint buffer) 
     data->preloadedSamples * sizeof(ALshort),
     info.sample_rate
   );
-  //printf("uploaded %d samples to buffer %d\n", data->preloadedSamples, buffer);
 
   int uploaded = data->preloadedSamples;
   data->preloadedSamples = 0;
@@ -109,8 +109,7 @@ int audio_vorbis_uploadPreloadedStreamSamples(void *decoderData, ALuint buffer) 
 }
 
 
-
-bool audio_vorbis_load(ALuint buffer, char const *filename) {
+bool audio_vorbis_load(ALuint buffer, char const* filename) {
   short *data;
   int channels;
   int samplingrate;

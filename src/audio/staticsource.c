@@ -1,3 +1,4 @@
+#include "../filesystem/filesystem.h"
 #include "staticsource.h"
 #include "decoder.h"
 
@@ -12,13 +13,14 @@ bool audio_loadStatic(audio_StaticSource *source, char const * filename) {
     ++filename;
   }
 
+  char const* infile = filesystem_locateReadableFile(filename);
+
   audio_SourceCommon_init(&source->common);
 
-//  alGenBuffers(1, &source->buffer);
   source->buffer = audio_StaticBuffer_new();
 
-  // TODO detect file type
-  bool loaded = staticDecoders[0]->loadFile(source->buffer->buffer, filename);
+  // decoder shall close the file
+  bool loaded = staticDecoders[0]->loadFile(source->buffer->buffer, infile);
 
   if(!loaded) {
     audio_StaticBuffer_free(source->buffer);
@@ -32,9 +34,9 @@ bool audio_loadStatic(audio_StaticSource *source, char const * filename) {
 
 
 void audio_StaticSource_free(audio_StaticSource *source) {
-  // TODO order of operations?
+  audio_SourceCommon_stop(&source->common);
   alSourcei(source->common.source, AL_BUFFER, AL_NONE);
-  audio_StaticBuffer_free(source->buffer);
+  audio_StaticBuffer_unref(source->buffer);
   audio_SourceCommon_free(&source->common);
 }
 

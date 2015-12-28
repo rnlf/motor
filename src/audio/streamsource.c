@@ -1,3 +1,4 @@
+#include "../filesystem/filesystem.h"
 #include <string.h>
 #include <stdlib.h>
 #include "streamsource.h"
@@ -9,15 +10,18 @@ static struct {
   int playingStreamCount;
 } moduleData;
 
+
 extern audio_StreamSourceDecoder audio_vorbis_decoder;
 
 static audio_StreamSourceDecoder const* streamDecoders[] = {
   &audio_vorbis_decoder
 };
 
+static void audio_StreamSource_stop1(audio_StreamSource *source);
+
 
 static void initialPreload(audio_StreamSource *source) {
-  for(int i = 0; i < 2; ++i) {
+  for(int i = 0; i < preloadBufferCount; ++i) {
     source->decoder->preloadSamples(source->decoderData, 44100);
     source->decoder->uploadPreloadedSamples(source->decoderData, source->buffers[i]);
   }
@@ -25,37 +29,36 @@ static void initialPreload(audio_StreamSource *source) {
 
 
 void audio_StreamSource_free(audio_StreamSource *source) {
-  // TODO order of operations?
-  audio_StreamSource_stop(source);
+  // Stop without rewind
+  audio_StreamSource_stop1(source);
 
   free(source->filename);
-  alDeleteBuffers(2, source->buffers);
+  alDeleteBuffers(preloadBufferCount, source->buffers);
   audio_SourceCommon_free(&source->common);
   source->decoder->closeFile(source->decoderData);
-  
 }
 
 
 bool audio_loadStream(audio_StreamSource *source, char const * filename) {
-  while(filename[0] == '/') {
-    ++filename;
-  }
-  // TODO select approprate decoder (there only one right now though!)
+  // TODO select approprate decoder (there is only one right now though!)
   source->decoder = streamDecoders[0];
+  
+  char const* infile = filesystem_locateReadableFile(filename);
 
-  bool good = source->decoder->openFile(filename, &source->decoderData);
+  bool good = source->decoder->openFile(infile, &source->decoderData);
   if(!good) {
     return false;
   }
 
   audio_SourceCommon_init(&source->common);
 
-  alGenBuffers(2, source->buffers);
+  alGenBuffers(preloadBufferCount, source->buffers);
 
   initialPreload(source);
 
   source->looping = false;
 
+  // Make copy of filename (allows simple free on the filename when closing a stream)
   source->filename = malloc(sizeof(char) * (strlen(filename) + 1));
   strcpy(source->filename, filename);
 
@@ -71,7 +74,7 @@ static void prepareToPlay(audio_StreamSource *source) {
     return;
   }
 
-  alSourceQueueBuffers(source->common.source, 2, source->buffers);
+  alSourceQueueBuffers(source->common.source, preloadBufferCount, source->buffers);
 
   if(moduleData.playingStreamCount == moduleData.playingStreamSize) {
     moduleData.playingStreamSize = 2 * moduleData.playingStreamSize;
@@ -134,6 +137,10 @@ void audio_updateStreams(void) {
     if(state == AL_STOPPED && queued == 0) {
       --moduleData.playingStreamCount;
       moduleData.playingStreams[i] = moduleData.playingStreams[moduleData.playingStreamCount];
+    } else if(state == AL_STOPPED && queued > 0) {
+      // Should only happen when we seriously ran out of time,
+      // but there are documented cases where it happened during load time.
+      alSourcePlay(src);
     } else {
       ++i;
     }
@@ -158,11 +165,8 @@ void audio_streamsource_init(void) {
 }
 
 
-void audio_StreamSource_stop(audio_StreamSource *source) {
-  if(source->common.state == audio_SourceState_stopped) {
-    return;
-  }
-
+static void audio_StreamSource_stop1(audio_StreamSource *source) {
+  // Remove from list of active streams
   for(int i = 0; i < moduleData.playingStreamCount; ++i) {
     if(moduleData.playingStreams[i] == source) {
       --moduleData.playingStreamCount;
@@ -179,6 +183,15 @@ void audio_StreamSource_stop(audio_StreamSource *source) {
     ALuint buf;
     alSourceUnqueueBuffers(source->common.source, 1, &buf);
   }
+}
+
+
+void audio_StreamSource_stop(audio_StreamSource *source) {
+  if(source->common.state == audio_SourceState_stopped) {
+    return;
+  }
+
+  audio_StreamSource_stop1(source);
 
   source->decoder->rewind(source->decoderData);
   source->decoder->flush(source->decoderData);
