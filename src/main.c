@@ -123,6 +123,15 @@ void main_loop(void *data) {
     case SDL_JOYAXISMOTION:
       joystick_axisEvent(event.jaxis.which, event.jaxis.axis, event.jaxis.value);
       break;
+    case SDL_CONTROLLERBUTTONUP:
+      joystick_controllerButtonReleased(event.jbutton.which, event.jbutton.button);
+      break;
+    case SDL_CONTROLLERBUTTONDOWN:
+      joystick_controllerButtonPressed(event.jbutton.which, event.jbutton.button);
+      break;
+    case SDL_CONTROLLERAXISMOTION:
+      joystick_controllerAxisEvent(event.jaxis.which, event.jaxis.axis, event.jaxis.value);
+      break;
 
 
 #ifndef EMSCRIPTEN

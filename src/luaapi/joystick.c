@@ -440,6 +440,55 @@ static void l_joystick_joystickReleased(void *ud, joystick_Joystick *device, int
 }
 
 
+static void l_joystick_gamepadAxis(void *ud, joystick_Joystick *device, joystick_GamepadAxis axis, float value) {
+  lua_State * state = (lua_State*)ud;
+  int top = lua_gettop(state);
+  lua_getglobal(state, "love");
+  lua_pushstring(state, "gamepadaxis");
+  lua_rawget(state, -2);
+  
+  l_joystick_pushDevice(state, device);
+
+  l_tools_pushEnum(state, axis, l_joystick_GamepadAxis);
+  lua_pushnumber(state, value);
+
+  lua_call(state, 3, 0);
+  lua_settop(state, top);
+}
+
+
+static void l_joystick_gamepadPressed(void *ud, joystick_Joystick *device, joystick_GamepadButton button) {
+  lua_State * state = (lua_State*)ud;
+  int top = lua_gettop(state);
+  lua_getglobal(state, "love");
+  lua_pushstring(state, "gamepadpressed");
+  lua_rawget(state, -2);
+  
+  l_joystick_pushDevice(state, device);
+
+  l_tools_pushEnum(state, button, l_joystick_GamepadButton);
+
+  lua_call(state, 2, 0);
+  lua_settop(state, top);
+}
+
+
+static void l_joystick_gamepadReleased(void *ud, joystick_Joystick *device, joystick_GamepadButton button) {
+  lua_State * state = (lua_State*)ud;
+  int top = lua_gettop(state);
+  lua_getglobal(state, "love");
+  lua_pushstring(state, "gamepadreleased");
+  lua_rawget(state, -2);
+  
+  l_joystick_pushDevice(state, device);
+
+  l_tools_pushEnum(state, button, l_joystick_GamepadButton);
+
+  lua_call(state, 2, 0);
+  lua_settop(state, top);
+}
+
+
 static luaL_Reg const regFuncs[] = {
   {"getJoysticks",      l_joysticks_getJoysticks},
   {"getJoystickCount",  l_joysticks_getJoystickCount},
@@ -458,6 +507,9 @@ void l_joystick_register(lua_State* state) {
     .joystickAxis     = l_joystick_joystickAxis,
     .joystickPressed  = l_joystick_joystickPressed,
     .joystickReleased = l_joystick_joystickReleased,
+    .gamepadAxis      = l_joystick_gamepadAxis,
+    .gamepadPressed   = l_joystick_gamepadPressed,
+    .gamepadReleased  = l_joystick_gamepadReleased,
     .userData         = state
   };
 

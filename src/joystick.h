@@ -95,6 +95,9 @@ void joystick_deviceRemoved(int index);
 void joystick_buttonPressed(int id, int button);
 void joystick_buttonReleased(int id, int button);
 void joystick_axisEvent(int id, int axis, int value);
+void joystick_controllerButtonPressed(int id, int button);
+void joystick_controllerButtonReleased(int id, int button);
+void joystick_controllerAxisEvent(int id, int axis, int value);
 bool joystick_Joystick_isConnected(joystick_Joystick const* joystick);
 bool joystick_Joystick_isGamepad(joystick_Joystick const* joystick);
 float joystick_Joystick_getAxis(joystick_Joystick const* joystick, int axis);
@@ -119,6 +122,9 @@ typedef struct {
   void (*joystickAxis)(void *userData, joystick_Joystick *device, int axis, float value);
   void (*joystickPressed)(void *userData, joystick_Joystick *device, int button);
   void (*joystickReleased)(void *userData, joystick_Joystick *device, int button);
+  void (*gamepadAxis)(void *userData, joystick_Joystick *device, joystick_GamepadAxis axis, float value);
+  void (*gamepadPressed)(void *userData, joystick_Joystick *device, joystick_GamepadButton button);
+  void (*gamepadReleased)(void *userData, joystick_Joystick *device, joystick_GamepadButton button);
   void *userData;
 } joystick_EventCallbacks;
 

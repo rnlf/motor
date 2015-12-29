@@ -110,6 +110,24 @@ void joystick_axisEvent(int id, int axis, int value) {
 }
 
 
+void joystick_controllerButtonPressed(int id, SDL_GameControllerButton button) {
+  moduleData.callbacks.gamepadPressed(moduleData.callbacks.userData,
+    findJoystickBySDLInstanceID(id), button);
+}
+
+
+void joystick_controllerButtonReleased(int id, SDL_GameControllerButton button) {
+  moduleData.callbacks.gamepadReleased(moduleData.callbacks.userData,
+    findJoystickBySDLInstanceID(id), button);
+}
+
+
+void joystick_controllerAxisEvent(int id, SDL_GameControllerAxis axis, int value) {
+  moduleData.callbacks.gamepadAxis(moduleData.callbacks.userData,
+    findJoystickBySDLInstanceID(id), axis, value / 32767.0f);
+}
+
+
 void joystick_init(void) {
   SDL_InitSubSystem(SDL_INIT_JOYSTICK);
   SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER);
