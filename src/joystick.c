@@ -165,3 +165,13 @@ char const * joystick_Joystick_getName(joystick_Joystick const* joystick) {
   // web standardization, eh?
   return SDL_JoystickName(joystick->joystick);
 }
+
+
+int joystick_Joystick_getID(joystick_Joystick const* joystick) {
+  return joystick->id;
+}
+
+
+int joystick_Joystick_getInstanceID(joystick_Joystick const* joystick) {
+  return SDL_JoystickInstanceID(joystick->joystick);
+}

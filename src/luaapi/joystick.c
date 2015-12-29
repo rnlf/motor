@@ -151,6 +151,16 @@ static int l_joystick_Joystick_getName(lua_State *state) {
 }
 
 
+static int l_joystick_Joystick_getID(lua_State *state) {
+  l_joystick_Joystick *joystick = l_joystick_toJoystick(state, 1);
+  
+  lua_pushinteger(state, joystick_Joystick_getID(joystick->joystick));
+  lua_pushinteger(state, joystick_Joystick_getInstanceID(joystick->joystick));
+
+  return 2;
+}
+
+
 static luaL_Reg const joystickMetatableFuncs[] = {
   {"isConnected",    l_joystick_Joystick_isConnected},
   {"getAxis",        l_joystick_Joystick_getAxis},
@@ -162,6 +172,7 @@ static luaL_Reg const joystickMetatableFuncs[] = {
   {"getHatCount",    l_joystick_Joystick_getHatCount},
   {"getHat",         l_joystick_Joystick_getHat},
   {"getName",        l_joystick_Joystick_getName},
+  {"getID",          l_joystick_Joystick_getID},
   {NULL, NULL}
 };
 
