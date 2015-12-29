@@ -30,11 +30,6 @@ static int l_joysticks_getJoystickCount(lua_State* state) {
 }
 
 
-static luaL_Reg const regFuncs[] = {
-  {"getJoysticks",     l_joysticks_getJoysticks},
-  {"getJoystickCount", l_joysticks_getJoystickCount},
-  {NULL, NULL}
-};
 
 
 static int l_joystick_Joystick_isConnected(lua_State *state) {
@@ -434,6 +429,14 @@ static void l_joystick_joystickReleased(void *ud, joystick_Joystick *device, int
   lua_call(state, 2, 0);
   lua_settop(state, top);
 }
+
+
+static luaL_Reg const regFuncs[] = {
+  {"getJoysticks",      l_joysticks_getJoysticks},
+  {"getJoystickCount",  l_joysticks_getJoystickCount},
+  {"getGamepadMapping", l_joystick_Joystick_getGamepadMapping},
+  {NULL, NULL}
+};
 
 
 void l_joystick_register(lua_State* state) {
