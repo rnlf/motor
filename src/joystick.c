@@ -195,13 +195,15 @@ bool joystick_Joystick_isGamepadDown(joystick_Joystick const* joystick, joystick
 
 
 static joystick_GamepadBind joystick_getBind(joystick_GUID guid, char const* button) {
-#ifndef EMSCRIPTEN
   SDL_JoystickGUID jguid = SDL_JoystickGetGUIDFromString(guid.guid);
-#else
-  // FIXME: emscripten port SDL2 is broken
-  SDL_JoystickGUID jguid = SDL_JoystickGetGUIDFromString("emscripten");
-#endif
   char * mapping = SDL_GameControllerMappingForGUID(jguid);
+
+#ifdef EMSCRIPTEN
+  // FIXME: emscripten port SDL2 is broken
+  if(!mapping) {
+    mapping = SDL_GameControllerMappingForGUID(SDL_JoystickGetGUIDFromString("emscripten"));
+  }
+#endif
 
   joystick_GamepadBind bind;
 
