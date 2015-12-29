@@ -56,7 +56,8 @@ typedef struct {
   int value;
 } l_tools_Enum;
 
-inline int l_tools_toEnumOrError(lua_State* state, int index, l_tools_Enum const* values) {
+
+inline int l_tools_toEnum(lua_State* state, int index, l_tools_Enum const* values, int invalidValue) {
   char const* string = l_tools_toStringOrError(state, index);
 
   while(values->name) {
@@ -65,10 +66,22 @@ inline int l_tools_toEnumOrError(lua_State* state, int index, l_tools_Enum const
     }
     ++values;
   }
-
-  lua_pushstring(state, "invalid enum value");
-  return lua_error(state);
+  
+  return invalidValue;
 }
+
+
+inline int l_tools_toEnumOrError(lua_State* state, int index, l_tools_Enum const* values) {
+  int val = l_tools_toEnum(state, index, values, INT_MIN);
+
+  if(val == INT_MIN) {
+    lua_pushstring(state, "invalid enum value");
+    return lua_error(state);
+  }
+
+  return val;
+}
+
 
 void l_tools_pushEnum(lua_State* state, int value, l_tools_Enum const* values);
 
