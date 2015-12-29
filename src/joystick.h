@@ -1,11 +1,13 @@
 #pragma once
 
 #include <SDL_joystick.h>
+#include <SDL_gamecontroller.h>
 #include <stdbool.h>
 
 
 typedef struct {
   SDL_Joystick *joystick;
+  SDL_GameController *controller;
   SDL_JoystickID id;
 } joystick_Joystick;
 

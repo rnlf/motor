@@ -35,6 +35,11 @@ static joystick_Joystick* openJoystick(int i) {
   joystick_Joystick *js = moduleData.joysticks + (moduleData.joystickCount - 1);
   js->joystick = SDL_JoystickOpen(i);
   js->id = SDL_JoystickInstanceID(js->joystick);
+  if(SDL_IsGameController(i)) {
+    js->controller = SDL_GameControllerOpen(i);
+  } else {
+    js->controller = 0;
+  }
   return js;
 }
 
