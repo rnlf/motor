@@ -96,3 +96,19 @@ void joystick_init(void) {
 void joystick_setEventCallbacks(joystick_EventCallbacks const *callbacks) {
   moduleData.callbacks = *callbacks;
 }
+
+
+bool joystick_Joystick_isConnected(joystick_Joystick const* joystick) {
+  return SDL_JoystickGetAttached(joystick->joystick);
+}
+
+
+float joystick_Joystick_getAxis(joystick_Joystick const* joystick, int axis) {
+  int16_t val = SDL_JoystickGetAxis(joystick->joystick, axis);
+  return val / 32767.0f;
+}
+
+
+int joystick_Joystick_getAxisCount(joystick_Joystick const* joystick) {
+  return SDL_JoystickNumAxes(joystick->joystick);
+}

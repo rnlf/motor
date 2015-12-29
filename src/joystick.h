@@ -14,6 +14,10 @@ void joystick_init(void);
 void joystick_deviceAdded(int index);
 void joystick_deviceRemoved(int index);
 void joystick_buttonEvent(int index, int button, bool state);
+bool joystick_Joystick_isConnected(joystick_Joystick const* joystick);
+float joystick_Joystick_getAxis(joystick_Joystick const* joystick, int axis);
+int joystick_Joystick_getAxisCount(joystick_Joystick const* joystick);
+
 
 
 typedef struct {
