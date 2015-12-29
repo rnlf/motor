@@ -17,6 +17,19 @@ typedef struct {
 } joystick_GUID;
 
 
+typedef enum {
+  joystick_JoystickHat_centered   = SDL_HAT_CENTERED,
+  joystick_JoystickHat_down       = SDL_HAT_DOWN,
+  joystick_JoystickHat_left       = SDL_HAT_LEFT,
+  joystick_JoystickHat_left_down  = SDL_HAT_LEFTDOWN,
+  joystick_JoystickHat_left_up    = SDL_HAT_LEFTUP,
+  joystick_JoystickHat_right      = SDL_HAT_RIGHT,
+  joystick_JoystickHat_right_down = SDL_HAT_RIGHTDOWN,
+  joystick_JoystickHat_right_up   = SDL_HAT_RIGHTUP,
+  joystick_JoystickHat_up         = SDL_HAT_UP
+} joystick_JoystickHat;
+
+
 int joystick_getCount(void);
 void joystick_init(void);
 void joystick_deviceAdded(int index);
@@ -28,6 +41,8 @@ int joystick_Joystick_getAxisCount(joystick_Joystick const* joystick);
 int joystick_Joystick_getButtonCount(joystick_Joystick const* joystick);
 bool joystick_Joystick_isDown(joystick_Joystick const* joystick, int button);
 joystick_GUID joystick_Joystick_getGUID(joystick_Joystick const* joystick);
+int joystick_Joystick_getHatCount(joystick_Joystick const* joystick);
+joystick_JoystickHat joystick_Joystick_getHat(joystick_Joystick const* joystick, int hat);
 
 
 typedef struct {

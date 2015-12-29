@@ -107,6 +107,41 @@ static int l_joystick_Joystick_getGUID(lua_State *state) {
 }
 
 
+static int l_joystick_Joystick_getHatCount(lua_State *state) {
+  l_joystick_Joystick *joystick = l_joystick_toJoystick(state, 1);
+  lua_pushinteger(state, joystick_Joystick_getHatCount(joystick->joystick));
+
+  return 1;
+}
+
+
+static const l_tools_Enum l_joystick_JoystickHat[] = {
+  {"c",    joystick_JoystickHat_centered},
+  {"d",    joystick_JoystickHat_down},
+  {"l",    joystick_JoystickHat_left},
+  {"ld",   joystick_JoystickHat_left_down},
+  {"lu",   joystick_JoystickHat_left_up},
+  {"r",    joystick_JoystickHat_right},
+  {"rd",   joystick_JoystickHat_right_down},
+  {"ru",   joystick_JoystickHat_right_up},
+  {"u",    joystick_JoystickHat_up},
+  {NULL, 0}
+};
+
+
+static int l_joystick_Joystick_getHat(lua_State *state) {
+  l_joystick_Joystick *joystick = l_joystick_toJoystick(state, 1);
+
+  int hat = l_tools_toNumberOrError(state, 2) - 1;
+
+  joystick_JoystickHat dir = joystick_Joystick_getHat(joystick->joystick, hat);
+
+  l_tools_pushEnum(state, dir, l_joystick_JoystickHat);
+
+  return 1;
+}
+
+
 static luaL_Reg const joystickMetatableFuncs[] = {
   {"isConnected",    l_joystick_Joystick_isConnected},
   {"getAxis",        l_joystick_Joystick_getAxis},
@@ -115,6 +150,8 @@ static luaL_Reg const joystickMetatableFuncs[] = {
   {"getButtonCount", l_joystick_Joystick_getButtonCount},
   {"isDown",         l_joystick_Joystick_isDown},
   {"getGUID",        l_joystick_Joystick_getGUID},
+  {"getHatCount",    l_joystick_Joystick_getHatCount},
+  {"getHat",         l_joystick_Joystick_getHat},
   {NULL, NULL}
 };
 

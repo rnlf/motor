@@ -135,3 +135,13 @@ joystick_GUID joystick_Joystick_getGUID(joystick_Joystick const* joystick) {
   SDL_JoystickGetGUIDString(g, guid.guid, sizeof(guid.guid));
   return guid;
 }
+
+
+int joystick_Joystick_getHatCount(joystick_Joystick const* joystick) {
+  return SDL_JoystickNumHats(joystick->joystick);
+}
+
+
+joystick_JoystickHat joystick_Joystick_getHat(joystick_Joystick const* joystick, int hat) {
+  return (joystick_JoystickHat) SDL_JoystickGetHat(joystick->joystick, hat);
+}
