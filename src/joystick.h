@@ -45,6 +45,7 @@ bool joystick_Joystick_isDown(joystick_Joystick const* joystick, int button);
 joystick_GUID joystick_Joystick_getGUID(joystick_Joystick const* joystick);
 int joystick_Joystick_getHatCount(joystick_Joystick const* joystick);
 joystick_JoystickHat joystick_Joystick_getHat(joystick_Joystick const* joystick, int hat);
+char const * joystick_Joystick_getName(joystick_Joystick const* joystick);
 
 
 typedef struct {

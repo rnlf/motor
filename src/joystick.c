@@ -158,3 +158,10 @@ int joystick_Joystick_getHatCount(joystick_Joystick const* joystick) {
 joystick_JoystickHat joystick_Joystick_getHat(joystick_Joystick const* joystick, int hat) {
   return (joystick_JoystickHat) SDL_JoystickGetHat(joystick->joystick, hat);
 }
+
+
+char const * joystick_Joystick_getName(joystick_Joystick const* joystick) {
+  // This returns differently formatted strings on all browsers. Hooray for
+  // web standardization, eh?
+  return SDL_JoystickName(joystick->joystick);
+}
