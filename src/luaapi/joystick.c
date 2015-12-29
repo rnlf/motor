@@ -169,6 +169,62 @@ static int l_joystick_Joystick_getID(lua_State *state) {
 }
 
 
+static const l_tools_Enum l_joystick_GamepadAxis[] = {
+  {"leftx",        joystick_GamepadAxis_left_x},
+  {"lefty",        joystick_GamepadAxis_left_y},
+  {"rightx",       joystick_GamepadAxis_right_x},
+  {"righty",       joystick_GamepadAxis_right_y},
+  {"triggerleft",  joystick_GamepadAxis_left_trigger},
+  {"triggerright", joystick_GamepadAxis_right_trigger},
+  {NULL, 0}
+};
+
+static int l_joystick_Joystick_getGamepadAxis(lua_State *state) {
+  l_joystick_Joystick *joystick = l_joystick_toJoystick(state, 1);
+  joystick_GamepadAxis axis = l_tools_toEnumOrError(state, 2, l_joystick_GamepadAxis);
+  lua_pushnumber(state, joystick_Joystick_getGamepadAxis(joystick->joystick, axis));
+
+  return 1;
+}
+
+
+static const l_tools_Enum l_joystick_GamepadButton[] = {
+  {"a",             joystick_GamepadButton_a},
+  {"b",             joystick_GamepadButton_b},
+  {"x",             joystick_GamepadButton_x},
+  {"y",             joystick_GamepadButton_y},
+  {"back",          joystick_GamepadButton_back},
+  {"guide",         joystick_GamepadButton_guide},
+  {"start",         joystick_GamepadButton_start},
+  {"leftstick",     joystick_GamepadButton_left_stick},
+  {"rightstick",    joystick_GamepadButton_right_stick},
+  {"leftshoulder",  joystick_GamepadButton_left_shoulder},
+  {"rightshoulder", joystick_GamepadButton_right_shoulder},
+  {"dpup",          joystick_GamepadButton_dpad_up},
+  {"dpdown",        joystick_GamepadButton_dpad_down},
+  {"dpleft",        joystick_GamepadButton_dpag_left},
+  {"dpright",       joystick_GamepadButton_dpad_right},
+  {NULL, 0}
+};
+
+static int l_joystick_Joystick_isGamepadDown(lua_State *state) {
+  l_joystick_Joystick *joystick = l_joystick_toJoystick(state, 1);
+
+  int count = lua_gettop(state) - 1;
+  bool down = false;
+  for(int i = 0; i < count; ++i) {
+    joystick_GamepadButton button = l_tools_toEnumOrError(state, 2, l_joystick_GamepadButton);
+    down = down || joystick_Joystick_isGamepadDown(joystick->joystick, button);
+    if(down) {
+      break;
+    }
+  }
+
+  lua_pushboolean(state, down);
+  return 1;
+}
+
+
 static luaL_Reg const joystickMetatableFuncs[] = {
   {"isConnected",    l_joystick_Joystick_isConnected},
   {"isGamepad",      l_joystick_Joystick_isGamepad},
@@ -182,6 +238,8 @@ static luaL_Reg const joystickMetatableFuncs[] = {
   {"getHat",         l_joystick_Joystick_getHat},
   {"getName",        l_joystick_Joystick_getName},
   {"getID",          l_joystick_Joystick_getID},
+  {"getGamepadAxis", l_joystick_Joystick_getGamepadAxis},
+  {"isGamepadDown",  l_joystick_Joystick_isGamepadDown},
   {NULL, NULL}
 };
 

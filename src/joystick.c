@@ -181,3 +181,13 @@ int joystick_Joystick_getID(joystick_Joystick const* joystick) {
 int joystick_Joystick_getInstanceID(joystick_Joystick const* joystick) {
   return SDL_JoystickInstanceID(joystick->joystick);
 }
+
+
+float joystick_Joystick_getGamepadAxis(joystick_Joystick const* joystick, joystick_GamepadAxis axis) {
+  return SDL_GameControllerGetAxis(joystick->controller, (SDL_GameControllerAxis) axis) / 32767.0f;
+}
+
+
+bool joystick_Joystick_isGamepadDown(joystick_Joystick const* joystick, joystick_GamepadButton button) {
+  return SDL_GameControllerGetButton(joystick->controller, (SDL_GameControllerButton) button);
+}

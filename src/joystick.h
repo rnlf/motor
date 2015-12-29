@@ -30,6 +30,34 @@ typedef enum {
 } joystick_JoystickHat;
 
 
+typedef enum {
+  joystick_GamepadAxis_left_x        = SDL_CONTROLLER_AXIS_LEFTX,
+  joystick_GamepadAxis_left_y        = SDL_CONTROLLER_AXIS_LEFTY,
+  joystick_GamepadAxis_right_x       = SDL_CONTROLLER_AXIS_RIGHTX,
+  joystick_GamepadAxis_right_y       = SDL_CONTROLLER_AXIS_RIGHTY,
+  joystick_GamepadAxis_left_trigger  = SDL_CONTROLLER_AXIS_TRIGGERLEFT,
+  joystick_GamepadAxis_right_trigger = SDL_CONTROLLER_AXIS_TRIGGERRIGHT
+} joystick_GamepadAxis;
+
+
+typedef enum {
+  joystick_GamepadButton_a              = SDL_CONTROLLER_BUTTON_A,
+  joystick_GamepadButton_b              = SDL_CONTROLLER_BUTTON_B,
+  joystick_GamepadButton_x              = SDL_CONTROLLER_BUTTON_X,
+  joystick_GamepadButton_y              = SDL_CONTROLLER_BUTTON_Y,
+  joystick_GamepadButton_back           = SDL_CONTROLLER_BUTTON_BACK,
+  joystick_GamepadButton_guide          = SDL_CONTROLLER_BUTTON_GUIDE,
+  joystick_GamepadButton_start          = SDL_CONTROLLER_BUTTON_START,
+  joystick_GamepadButton_left_stick     = SDL_CONTROLLER_BUTTON_LEFTSTICK,
+  joystick_GamepadButton_right_stick    = SDL_CONTROLLER_BUTTON_RIGHTSTICK,
+  joystick_GamepadButton_left_shoulder  = SDL_CONTROLLER_BUTTON_LEFTSHOULDER,
+  joystick_GamepadButton_right_shoulder = SDL_CONTROLLER_BUTTON_RIGHTSHOULDER,
+  joystick_GamepadButton_dpad_up        = SDL_CONTROLLER_BUTTON_DPAD_UP,
+  joystick_GamepadButton_dpad_down      = SDL_CONTROLLER_BUTTON_DPAD_DOWN,
+  joystick_GamepadButton_dpag_left      = SDL_CONTROLLER_BUTTON_DPAD_LEFT,
+  joystick_GamepadButton_dpad_right     = SDL_CONTROLLER_BUTTON_DPAD_RIGHT
+} joystick_GamepadButton;
+
 int joystick_getCount(void);
 void joystick_init(void);
 void joystick_deviceAdded(int index);
@@ -49,6 +77,8 @@ joystick_JoystickHat joystick_Joystick_getHat(joystick_Joystick const* joystick,
 char const * joystick_Joystick_getName(joystick_Joystick const* joystick);
 int joystick_Joystick_getID(joystick_Joystick const* joystick);
 int joystick_Joystick_getInstanceID(joystick_Joystick const* joystick);
+float joystick_Joystick_getGamepadAxis(joystick_Joystick const* joystick, joystick_GamepadAxis axis);
+bool joystick_Joystick_isGamepadDown(joystick_Joystick const* joystick, joystick_GamepadButton button);
 
 
 typedef struct {
