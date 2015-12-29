@@ -117,3 +117,13 @@ float joystick_Joystick_getAxis(joystick_Joystick const* joystick, int axis) {
 int joystick_Joystick_getAxisCount(joystick_Joystick const* joystick) {
   return SDL_JoystickNumAxes(joystick->joystick);
 }
+
+
+int joystick_Joystick_getButtonCount(joystick_Joystick const* joystick) {
+  return SDL_JoystickNumButtons(joystick->joystick);
+}
+
+
+bool joystick_Joystick_isDown(joystick_Joystick const* joystick, int button) {
+  return SDL_JoystickGetButton(joystick->joystick, button);
+}
