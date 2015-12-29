@@ -82,8 +82,21 @@ void joystick_deviceRemoved(int id) {
 }
 
 
-void joystick_buttonEvent(int index, int button, bool state) {
-  printf("Button: %d, %d, %d\n", index, button, state);
+void joystick_buttonPressed(int id, int button) {
+  moduleData.callbacks.joystickPressed(moduleData.callbacks.userData,
+    findJoystickBySDLInstanceID(id), button);
+}
+
+
+void joystick_buttonReleased(int id, int button) {
+  moduleData.callbacks.joystickReleased(moduleData.callbacks.userData,
+    findJoystickBySDLInstanceID(id), button);
+}
+
+
+void joystick_axisEvent(int id, int axis, int value) {
+  moduleData.callbacks.joystickAxis(moduleData.callbacks.userData,
+    findJoystickBySDLInstanceID(id), axis, value / 32767.0f);
 }
 
 

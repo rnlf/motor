@@ -183,6 +183,26 @@ static void l_joystick_deviceAdded(void *ud, joystick_Joystick *device) {
 }
 
 
+// Push the Lua object corresponding to the given device onto the stack
+static void l_joystick_pushDevice(lua_State *state, joystick_Joystick *device) {
+  lua_rawgeti(state, LUA_REGISTRYINDEX, moduleData.joystickTableRef);
+
+  int len = lua_objlen(state, -1);
+  int i;
+  for(i = 0; i < len; ++i) {
+    lua_rawgeti(state, -1, i+1);
+    l_joystick_Joystick *js = l_joystick_toJoystick(state, -1);
+
+    if(js->joystick == device) {
+      lua_replace(state, -2);
+      return;
+    }
+
+    lua_pop(state, 1);
+  }
+}
+
+
 static void l_joystick_deviceRemoved(void *ud, joystick_Joystick *device) {
   lua_State *state = (lua_State*)ud;
 
@@ -210,7 +230,55 @@ static void l_joystick_deviceRemoved(void *ud, joystick_Joystick *device) {
   
   lua_pushnil(state);
   lua_rawseti(state, 1, len);
+}
 
+
+static void l_joystick_joystickAxis(void *ud, joystick_Joystick *device, int axis, float value) {
+  lua_State * state = (lua_State*)ud;
+  int top = lua_gettop(state);
+  lua_getglobal(state, "love");
+  lua_pushstring(state, "joystickaxis");
+  lua_rawget(state, -2);
+  
+  l_joystick_pushDevice(state, device);
+
+  lua_pushinteger(state, axis + 1);
+  lua_pushnumber(state, value);
+
+  lua_call(state, 3, 0);
+  lua_settop(state, top);
+}
+
+
+static void l_joystick_joystickPressed(void *ud, joystick_Joystick *device, int button) {
+  lua_State * state = (lua_State*)ud;
+  int top = lua_gettop(state);
+  lua_getglobal(state, "love");
+  lua_pushstring(state, "joystickpressed");
+  lua_rawget(state, -2);
+  
+  l_joystick_pushDevice(state, device);
+
+  lua_pushinteger(state, button + 1);
+
+  lua_call(state, 2, 0);
+  lua_settop(state, top);
+}
+
+
+static void l_joystick_joystickReleased(void *ud, joystick_Joystick *device, int button) {
+  lua_State * state = (lua_State*)ud;
+  int top = lua_gettop(state);
+  lua_getglobal(state, "love");
+  lua_pushstring(state, "joystickreleased");
+  lua_rawget(state, -2);
+  
+  l_joystick_pushDevice(state, device);
+
+  lua_pushinteger(state, button + 1);
+
+  lua_call(state, 2, 0);
+  lua_settop(state, top);
 }
 
 
@@ -219,9 +287,12 @@ void l_joystick_register(lua_State* state) {
   moduleData.joystickMT = l_tools_makeTypeMetatable(state, joystickMetatableFuncs);
 
   joystick_EventCallbacks callbacks = {
-    .deviceAdded   = l_joystick_deviceAdded,
-    .deviceRemoved = l_joystick_deviceRemoved,
-    .userData      = state
+    .deviceAdded      = l_joystick_deviceAdded,
+    .deviceRemoved    = l_joystick_deviceRemoved,
+    .joystickAxis     = l_joystick_joystickAxis,
+    .joystickPressed  = l_joystick_joystickPressed,
+    .joystickReleased = l_joystick_joystickReleased,
+    .userData         = state
   };
 
   joystick_setEventCallbacks(&callbacks);

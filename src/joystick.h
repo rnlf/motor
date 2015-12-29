@@ -34,7 +34,9 @@ int joystick_getCount(void);
 void joystick_init(void);
 void joystick_deviceAdded(int index);
 void joystick_deviceRemoved(int index);
-void joystick_buttonEvent(int index, int button, bool state);
+void joystick_buttonPressed(int id, int button);
+void joystick_buttonReleased(int id, int button);
+void joystick_axisEvent(int id, int axis, int value);
 bool joystick_Joystick_isConnected(joystick_Joystick const* joystick);
 float joystick_Joystick_getAxis(joystick_Joystick const* joystick, int axis);
 int joystick_Joystick_getAxisCount(joystick_Joystick const* joystick);
@@ -48,6 +50,9 @@ joystick_JoystickHat joystick_Joystick_getHat(joystick_Joystick const* joystick,
 typedef struct {
   void (*deviceAdded)(void *userData, joystick_Joystick *device);
   void (*deviceRemoved)(void *userData, joystick_Joystick *device);
+  void (*joystickAxis)(void *userData, joystick_Joystick *device, int axis, float value);
+  void (*joystickPressed)(void *userData, joystick_Joystick *device, int button);
+  void (*joystickReleased)(void *userData, joystick_Joystick *device, int button);
   void *userData;
 } joystick_EventCallbacks;
 

@@ -106,8 +106,13 @@ void main_loop(void *data) {
       joystick_deviceRemoved(event.jdevice.which);
       break;
     case SDL_JOYBUTTONUP:
+      joystick_buttonReleased(event.jbutton.which, event.jbutton.button);
+      break;
     case SDL_JOYBUTTONDOWN:
-      joystick_buttonEvent(event.jbutton.which, event.jbutton.button, event.jbutton.state);
+      joystick_buttonPressed(event.jbutton.which, event.jbutton.button);
+      break;
+    case SDL_JOYAXISMOTION:
+      joystick_axisEvent(event.jaxis.which, event.jaxis.axis, event.jaxis.value);
       break;
 
 
