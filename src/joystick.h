@@ -58,6 +58,27 @@ typedef enum {
   joystick_GamepadButton_dpad_right     = SDL_CONTROLLER_BUTTON_DPAD_RIGHT
 } joystick_GamepadButton;
 
+
+typedef enum {
+  joystick_GamepadMapType_none   = SDL_CONTROLLER_BINDTYPE_NONE,
+  joystick_GamepadMapType_button = SDL_CONTROLLER_BINDTYPE_BUTTON,
+  joystick_GamepadMapType_axis   = SDL_CONTROLLER_BINDTYPE_AXIS,
+  joystick_GamepadMapType_hat    = SDL_CONTROLLER_BINDTYPE_HAT
+} joystick_GamepadMapType;
+
+
+typedef struct {
+  joystick_GamepadMapType mapType;
+  union {
+    int button;
+    int axis;
+    struct {
+      int hat;
+      joystick_JoystickHat hatDir;
+    } hat;
+  } value;
+} joystick_GamepadBind;
+
 int joystick_getCount(void);
 void joystick_init(void);
 void joystick_deviceAdded(int index);
@@ -79,6 +100,8 @@ int joystick_Joystick_getID(joystick_Joystick const* joystick);
 int joystick_Joystick_getInstanceID(joystick_Joystick const* joystick);
 float joystick_Joystick_getGamepadAxis(joystick_Joystick const* joystick, joystick_GamepadAxis axis);
 bool joystick_Joystick_isGamepadDown(joystick_Joystick const* joystick, joystick_GamepadButton button);
+joystick_GamepadBind joystick_getButtonBind(joystick_GUID guid, joystick_GamepadButton axis);
+joystick_GamepadBind joystick_getAxisBind(joystick_GUID guid, joystick_GamepadAxis axis);
 
 
 typedef struct {

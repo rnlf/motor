@@ -232,21 +232,80 @@ static int l_joystick_Joystick_isGamepadDown(lua_State *state) {
 }
 
 
+static l_tools_Enum l_joystick_GamepadMapType[] = {
+  {"axis",   joystick_GamepadMapType_axis},
+  {"button", joystick_GamepadMapType_button},
+  {"hat",    joystick_GamepadMapType_hat},
+  {NULL, 0}
+};
+
+static int l_joystick_Joystick_getGamepadMapping(lua_State *state) {
+  joystick_GUID jguid;
+
+  bool button = true;
+  int thing = l_tools_toEnum(state, 2, l_joystick_GamepadButton, INT_MIN);
+  if(thing == INT_MIN) {
+    thing = l_tools_toEnumOrError(state, 2, l_joystick_GamepadAxis);
+    button = false;
+  }
+
+  if(lua_isstring(state, 1)) {
+    char const *guid = lua_tostring(state, 1);
+    strncpy(jguid.guid, guid, sizeof(jguid.guid));
+  } else {
+    l_assertType(state, 1, l_joystick_isJoystick);
+    l_joystick_Joystick const *joystick = l_joystick_toJoystick(state, 1);
+    jguid = joystick_Joystick_getGUID(joystick->joystick);
+  }
+
+  joystick_GamepadBind bind;
+
+  if(button) {
+    bind = joystick_getButtonBind(jguid, (joystick_GamepadButton)thing);
+  } else {
+    bind = joystick_getAxisBind(jguid, (joystick_GamepadAxis)thing);
+  }
+  
+  if(bind.mapType != joystick_GamepadMapType_none) {
+    l_tools_pushEnum(state, bind.mapType, l_joystick_GamepadMapType);
+  }
+
+  switch(bind.mapType) {
+  case joystick_GamepadMapType_button:
+    lua_pushinteger(state, bind.value.button + 1);
+    return 2;
+
+  case joystick_GamepadMapType_axis:
+    lua_pushinteger(state, bind.value.axis + 1);
+    return 2;
+
+  case joystick_GamepadMapType_hat:
+    lua_pushinteger(state, bind.value.hat.hat);
+    lua_pushinteger(state, bind.value.hat.hatDir);
+    return 3;
+
+  default:
+    return 0;
+  };
+}
+
+
 static luaL_Reg const joystickMetatableFuncs[] = {
-  {"isConnected",    l_joystick_Joystick_isConnected},
-  {"isGamepad",      l_joystick_Joystick_isGamepad},
-  {"getAxis",        l_joystick_Joystick_getAxis},
-  {"getAxes",        l_joystick_Joystick_getAxes},
-  {"getAxisCount",   l_joystick_Joystick_getAxisCount},
-  {"getButtonCount", l_joystick_Joystick_getButtonCount},
-  {"isDown",         l_joystick_Joystick_isDown},
-  {"getGUID",        l_joystick_Joystick_getGUID},
-  {"getHatCount",    l_joystick_Joystick_getHatCount},
-  {"getHat",         l_joystick_Joystick_getHat},
-  {"getName",        l_joystick_Joystick_getName},
-  {"getID",          l_joystick_Joystick_getID},
-  {"getGamepadAxis", l_joystick_Joystick_getGamepadAxis},
-  {"isGamepadDown",  l_joystick_Joystick_isGamepadDown},
+  {"isConnected",       l_joystick_Joystick_isConnected},
+  {"isGamepad",         l_joystick_Joystick_isGamepad},
+  {"getAxis",           l_joystick_Joystick_getAxis},
+  {"getAxes",           l_joystick_Joystick_getAxes},
+  {"getAxisCount",      l_joystick_Joystick_getAxisCount},
+  {"getButtonCount",    l_joystick_Joystick_getButtonCount},
+  {"isDown",            l_joystick_Joystick_isDown},
+  {"getGUID",           l_joystick_Joystick_getGUID},
+  {"getHatCount",       l_joystick_Joystick_getHatCount},
+  {"getHat",            l_joystick_Joystick_getHat},
+  {"getName",           l_joystick_Joystick_getName},
+  {"getID",             l_joystick_Joystick_getID},
+  {"getGamepadAxis",    l_joystick_Joystick_getGamepadAxis},
+  {"isGamepadDown",     l_joystick_Joystick_isGamepadDown},
+  {"getGamepadMapping", l_joystick_Joystick_getGamepadMapping},
   {NULL, NULL}
 };
 
