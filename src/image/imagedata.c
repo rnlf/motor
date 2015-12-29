@@ -13,7 +13,7 @@ char const* image_lastError(void) {
 bool image_ImageData_new_with_filename(image_ImageData *dst, char const* filename) {
   int n;
 
-  char *file = filesystem_locateReadableFile(filename);
+  char const *file = filesystem_locateReadableFile(filename);
   if(file == 0) {
     return false;
   }
