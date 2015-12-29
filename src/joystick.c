@@ -127,3 +127,11 @@ int joystick_Joystick_getButtonCount(joystick_Joystick const* joystick) {
 bool joystick_Joystick_isDown(joystick_Joystick const* joystick, int button) {
   return SDL_JoystickGetButton(joystick->joystick, button);
 }
+
+
+joystick_GUID joystick_Joystick_getGUID(joystick_Joystick const* joystick) {
+  SDL_JoystickGUID g = SDL_JoystickGetGUID(joystick->joystick);
+  joystick_GUID guid;
+  SDL_JoystickGetGUIDString(g, guid.guid, sizeof(guid.guid));
+  return guid;
+}

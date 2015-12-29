@@ -97,6 +97,16 @@ static int l_joystick_Joystick_isDown(lua_State *state) {
 }
 
 
+static int l_joystick_Joystick_getGUID(lua_State *state) {
+  l_joystick_Joystick *joystick = l_joystick_toJoystick(state, 1);
+  
+  joystick_GUID guid = joystick_Joystick_getGUID(joystick->joystick);
+  lua_pushstring(state, guid.guid);
+
+  return 1;
+}
+
+
 static luaL_Reg const joystickMetatableFuncs[] = {
   {"isConnected",    l_joystick_Joystick_isConnected},
   {"getAxis",        l_joystick_Joystick_getAxis},
@@ -104,6 +114,7 @@ static luaL_Reg const joystickMetatableFuncs[] = {
   {"getAxisCount",   l_joystick_Joystick_getAxisCount},
   {"getButtonCount", l_joystick_Joystick_getButtonCount},
   {"isDown",         l_joystick_Joystick_isDown},
+  {"getGUID",        l_joystick_Joystick_getGUID},
   {NULL, NULL}
 };
 

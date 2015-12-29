@@ -11,6 +11,12 @@ typedef struct {
   SDL_JoystickID id;
 } joystick_Joystick;
 
+
+typedef struct {
+  char guid[33];
+} joystick_GUID;
+
+
 int joystick_getCount(void);
 void joystick_init(void);
 void joystick_deviceAdded(int index);
@@ -21,7 +27,7 @@ float joystick_Joystick_getAxis(joystick_Joystick const* joystick, int axis);
 int joystick_Joystick_getAxisCount(joystick_Joystick const* joystick);
 int joystick_Joystick_getButtonCount(joystick_Joystick const* joystick);
 bool joystick_Joystick_isDown(joystick_Joystick const* joystick, int button);
-
+joystick_GUID joystick_Joystick_getGUID(joystick_Joystick const* joystick);
 
 
 typedef struct {
