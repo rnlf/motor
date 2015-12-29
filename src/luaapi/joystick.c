@@ -97,11 +97,18 @@ static int l_joystick_Joystick_getButtonCount(lua_State *state) {
 static int l_joystick_Joystick_isDown(lua_State *state) {
   l_joystick_Joystick *joystick = l_joystick_toJoystick(state, 1);
   int count = lua_gettop(state) - 1;
+
+  bool down = false;
   for(int i = 0; i < count; ++i) {
     int button = l_tools_toNumberOrError(state, i+2);
-    lua_pushboolean(state, joystick_Joystick_isDown(joystick->joystick, button - 1));
+    down = down || joystick_Joystick_isDown(joystick->joystick, button - 1);
+    if(down) {
+      break;
+    }
   }
-  return count;
+
+  lua_pushboolean(state, down);
+  return 1;
 }
 
 
