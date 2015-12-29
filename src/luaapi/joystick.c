@@ -45,6 +45,14 @@ static int l_joystick_Joystick_isConnected(lua_State *state) {
 }
 
 
+static int l_joystick_Joystick_isGamepad(lua_State *state) {
+  l_joystick_Joystick *joystick = l_joystick_toJoystick(state, 1);
+
+  lua_pushboolean(state, joystick_Joystick_isGamepad(joystick->joystick));
+  return 1;
+}
+
+
 static int l_joystick_Joystick_getAxis(lua_State *state) {
   l_joystick_Joystick *joystick = l_joystick_toJoystick(state, 1);
   int axis = l_tools_toNumberOrError(state, 2);
@@ -163,6 +171,7 @@ static int l_joystick_Joystick_getID(lua_State *state) {
 
 static luaL_Reg const joystickMetatableFuncs[] = {
   {"isConnected",    l_joystick_Joystick_isConnected},
+  {"isGamepad",      l_joystick_Joystick_isGamepad},
   {"getAxis",        l_joystick_Joystick_getAxis},
   {"getAxes",        l_joystick_Joystick_getAxes},
   {"getAxisCount",   l_joystick_Joystick_getAxisCount},

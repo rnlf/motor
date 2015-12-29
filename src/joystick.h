@@ -38,6 +38,7 @@ void joystick_buttonPressed(int id, int button);
 void joystick_buttonReleased(int id, int button);
 void joystick_axisEvent(int id, int axis, int value);
 bool joystick_Joystick_isConnected(joystick_Joystick const* joystick);
+bool joystick_Joystick_isGamepad(joystick_Joystick const* joystick);
 float joystick_Joystick_getAxis(joystick_Joystick const* joystick, int axis);
 int joystick_Joystick_getAxisCount(joystick_Joystick const* joystick);
 int joystick_Joystick_getButtonCount(joystick_Joystick const* joystick);

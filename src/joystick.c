@@ -102,6 +102,7 @@ void joystick_axisEvent(int id, int axis, int value) {
 
 void joystick_init(void) {
   SDL_InitSubSystem(SDL_INIT_JOYSTICK);
+  SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER);
 
   int count = SDL_NumJoysticks();
 
@@ -118,6 +119,11 @@ void joystick_setEventCallbacks(joystick_EventCallbacks const *callbacks) {
 
 bool joystick_Joystick_isConnected(joystick_Joystick const* joystick) {
   return SDL_JoystickGetAttached(joystick->joystick);
+}
+
+
+bool joystick_Joystick_isGamepad(joystick_Joystick const* joystick) {
+  return joystick->controller != 0;
 }
 
 
